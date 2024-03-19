@@ -1,0 +1,11 @@
+# server
+/server/node_modules
+/server/build
+/server/.env
+/server/models/seedblogs.ts
+/server/models/seedusers.ts
+
+# client
+/client/node_modules
+/client/build
+/client/.env
