@@ -30,7 +30,7 @@ export function AuthContextProvider({
 }) {
   const [user, setUser] = useState<User | null>(null)
 
-  const userQuery = useQuery<User, AxiosError>({
+  const existingSessionQuery = useQuery<User, AxiosError>({
     queryKey: ["user"],
     queryFn: async () => {
       const res = await axios.get(`${API_URL}/users/me`, {
@@ -64,7 +64,7 @@ export function AuthContextProvider({
 
   function signUp() {}
 
-  if (userQuery.isLoading) {
+  if (existingSessionQuery.isLoading) {
     return <div>Loading...</div>
   }
 
@@ -82,8 +82,8 @@ export function AuthContextProvider({
   //   }
   // }
 
-  if (userQuery.data && !user) {
-    setUser(userQuery.data)
+  if (existingSessionQuery.data && !user) {
+    setUser(existingSessionQuery.data)
   }
 
   const value: AuthContextType = {
