@@ -1,9 +1,9 @@
-<svg data-v-0dd9719b="" version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-  width="100%" height="100%" viewBox="0 0 340.000000 250.000000" preserveAspectRatio="xMidYMid meet"
+<svg  data-v-0dd9719b=""  version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+  width="100px" height="100px" viewBox="0 0 340.000000 250.000000" preserveAspectRatio="xMidYMid meet"
   color-interpolation-filters="sRGB" style="margin: auto;">
   <rect data-v-0dd9719b="" x="0" y="0" width="100%" height="100%" fill-opacity="0" class="watermarklayer">
   </rect>
-  <g data-v-0dd9719b="" fill="#333" class="iconlinesvg-g iconlinesvg"
+  <g data-v-0dd9719b="" fill="white" class="iconlinesvg-g iconlinesvg"
     transform="translate(67.69525146484375,90.78601455688477)">
     <g class="tp-name" transform="translate(0,0)">
       <g transform="translate(0, 0)">
