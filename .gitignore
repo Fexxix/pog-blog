@@ -4,6 +4,8 @@
 /server/.env
 /server/models/seedblogs.ts
 /server/models/seedusers.ts
+/server/models/*.json
+/server/models/*.js
 
 # client
 /client/node_modules
