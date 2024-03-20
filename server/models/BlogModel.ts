@@ -23,7 +23,20 @@ export const BlogModel = model(
       required: true,
     },
     author: {
-      type: String,
+      type: {
+        _id: {
+          type: String,
+          required: true,
+        },
+        username: {
+          type: String,
+          required: true,
+        },
+        profilePicture: {
+          type: String,
+          required: true,
+        },
+      },
       ref: "User",
       required: true,
     },
