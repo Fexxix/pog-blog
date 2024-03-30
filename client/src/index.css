@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.bg {
+  background-image: url(bg.jpg);
+  background-position: center;
+  background-size: cover; /* This ensures the image covers the entire background */
+  background-repeat: no-repeat;
+}
+
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
