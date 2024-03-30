@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button"
 import { useAuthContext } from "./contexts/AuthContextProvider"
 
 export default function App() {
@@ -6,12 +7,12 @@ export default function App() {
   return (
     <>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <button
+      <Button
         className="bg-white text-black rounded-md px-4 py-2"
         onClick={login}
       >
         Login
-      </button>
+      </Button>
     </>
   )
 }
