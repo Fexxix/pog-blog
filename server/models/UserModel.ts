@@ -30,6 +30,11 @@ export const UserModel = model(
         type: String,
         default: "This user has no biography",
       },
+      verified: {
+        type: Boolean,
+        required: true,
+        default: false,
+      },
     } as const,
     { _id: false }
   )
