@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { API_URL } from "@/config"
 import axios, { AxiosError } from "axios"
@@ -143,6 +143,8 @@ export function Signup() {
 }
 
 function useSignup() {
+  const navigate = useNavigate()
+
   return useMutation<any, AxiosError, SignupFormData>({
     mutationKey: ["signup"],
     mutationFn: async ({ email, password, username }) => {
@@ -157,6 +159,14 @@ function useSignup() {
           { withCredentials: true }
         )
       ).data
+    },
+    onSuccess: (_, { email }) => {
+      navigate("/otp", {
+        replace: true,
+        state: {
+          email,
+        },
+      })
     },
   })
 }
