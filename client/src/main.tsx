@@ -8,6 +8,8 @@ import Home from "./pages/home.jsx"
 import { ThemeProvider } from "./contexts/ThemeProvider.tsx"
 import { Signup } from "./pages/signup.tsx"
 import { HeaderLayout } from "./components/HeaderLayout.tsx"
+import { OTP } from "./pages/otp.tsx"
+import { Login } from "./pages/login.tsx"
 
 const browserRouter = createBrowserRouter([
   {
@@ -20,6 +22,14 @@ const browserRouter = createBrowserRouter([
       {
         path: "/signup",
         element: <Signup />,
+      },
+      {
+        path: "/otp",
+        element: <OTP />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
       },
     ],
   },
