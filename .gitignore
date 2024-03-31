@@ -2,8 +2,7 @@
 /server/node_modules
 /server/build
 /server/.env
-/server/models/seedblogs.ts
-/server/models/seedusers.ts
+/server/models/seed*.ts
 /server/models/*.json
 /server/models/*.js
 
