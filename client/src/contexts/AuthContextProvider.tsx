@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from "react"
 import { API_URL } from "../config"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
+import { LoadingSpinner } from "@/components/ui/loadingspinner"
 
 type User = {
   id: string
@@ -13,8 +14,12 @@ type User = {
 
 type AuthContextType = {
   user: User | null
-  login: () => void
-  signUp: () => void
+  login: (loginFormData: LoginFormData) => void
+}
+
+export type LoginFormData = {
+  email: string
+  password: string
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -23,12 +28,15 @@ export function useAuthContext() {
   return useContext(AuthContext)!
 }
 
+const privateRoutes = ["/profile", "/blogs"]
+
 export function AuthContextProvider({
   children,
 }: {
   children: React.ReactNode
 }) {
   const [user, setUser] = useState<User | null>(null)
+  const currentRoute = window.location.pathname
 
   const existingSessionQuery = useQuery<User, AxiosError>({
     queryKey: ["user"],
@@ -42,30 +50,17 @@ export function AuthContextProvider({
       }
     },
     refetchOnWindowFocus: false,
+    enabled: privateRoutes.includes(currentRoute),
   })
 
-  const loginMutation = useMutation({
-    mutationKey: ["login"],
-    mutationFn: async () => {
-      await axios.post(
-        `${API_URL}/users/login`,
-        {
-          email: "foo@bar.com",
-          password: "foobar",
-        },
-        { withCredentials: true }
-      )
-    },
-  })
+  const loginMutation = useLogin()
 
-  function login() {
-    loginMutation.mutate()
+  function login({ email, password }: LoginFormData) {
+    loginMutation.mutate({ email, password })
   }
 
-  function signUp() {}
-
   if (existingSessionQuery.isLoading) {
-    return <div>Loading...</div>
+    return <LoadingSpinner fullPage />
   }
 
   // if (userQuery.isError) {
@@ -88,9 +83,24 @@ export function AuthContextProvider({
 
   const value: AuthContextType = {
     login,
-    signUp,
     user,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+function useLogin() {
+  return useMutation({
+    mutationKey: ["login"],
+    mutationFn: async ({ email, password }: LoginFormData) => {
+      await axios.post(
+        `${API_URL}/users/login`,
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      )
+    },
+  })
 }
