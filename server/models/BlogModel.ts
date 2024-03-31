@@ -6,7 +6,7 @@ const LikesSchema = new Schema({
     default: 0,
   },
   likedBy: {
-    type: [{ type: String, ref: "User" }],
+    type: [{ type: String, ref: "users" }],
     default: [],
   },
 })
@@ -22,22 +22,15 @@ export const BlogModel = model(
       type: String,
       required: true,
     },
+    description: {
+      type: String,
+    },
+    image: {
+      type: String,
+    },
     author: {
-      type: {
-        _id: {
-          type: String,
-          required: true,
-        },
-        username: {
-          type: String,
-          required: true,
-        },
-        profilePicture: {
-          type: String,
-          required: true,
-        },
-      },
-      ref: "User",
+      type: String,
+      ref: "users",
       required: true,
     },
     datePublished: {
