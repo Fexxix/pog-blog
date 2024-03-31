@@ -3,6 +3,7 @@
 /server/build
 /server/.env
 /server/models/seed*.ts
+/server/models/seed*2.ts
 /server/models/*.json
 /server/models/*.js
 
