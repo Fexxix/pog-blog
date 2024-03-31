@@ -11,11 +11,7 @@ const MIN_PASSWORD_LENGTH = 6
 const argon2id = new Argon2id()
 
 userRouter.post("/signup", async (req, res) => {
-  const { email, password, username } = req.body ?? {
-    email: "",
-    password: "",
-    username: "",
-  }
+  const { email = "", password = "", username = "" } = req.body
 
   const exists = await UserModel.exists({ email })
 
