@@ -151,7 +151,7 @@ function useLogin() {
     },
     onSuccess: ({ user }) => {
       setUser(user)
-      navigate("/", { replace: true })
+      navigate("/blogs", { replace: true })
       setHasSession(true)
       toast.success("Logged in!")
     },
