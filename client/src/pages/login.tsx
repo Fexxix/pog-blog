@@ -132,7 +132,7 @@ export function Login() {
 }
 
 function useLogin() {
-  const { setUser } = useAuthContext()
+  const { setUser, setHasSession } = useAuthContext()
   const navigate = useNavigate()
 
   return useMutation<LoginMutationResponse, AxiosError, LoginFormData>({
@@ -151,7 +151,8 @@ function useLogin() {
     },
     onSuccess: ({ user }) => {
       setUser(user)
-      navigate("/blogs", { replace: true })
+      navigate("/", { replace: true })
+      setHasSession(true)
       toast.success("Logged in!")
     },
   })
