@@ -125,7 +125,7 @@ export function Signup() {
                   "text-red-600": !signupMutation?.data?.message,
                 })}
               >
-                {signupMutation?.data.message}
+                {signupMutation?.data?.message}
                 {(signupMutation?.error?.response?.data as any)?.message}
               </div>
             )}
