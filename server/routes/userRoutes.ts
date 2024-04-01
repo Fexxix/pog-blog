@@ -76,11 +76,7 @@ userRouter.post("/signup", async (req, res) => {
 })
 
 userRouter.post("/login", async (req, res) => {
-  if (res.locals.session) {
-    return res.status(400).json({ message: "Already Logged in!" })
-  }
-
-  const { email, password } = req.body ?? { email: "", password: "" }
+  const { email = "", password = "" } = req.body
 
   if (!email || typeof email !== "string" || !isValidEmail(email)) {
     return res.status(400).send("Invalid email")
@@ -108,13 +104,23 @@ userRouter.post("/login", async (req, res) => {
     }
 
     const session = await lucia.createSession(user._id, {})
+
     res
       .appendHeader(
         "Set-Cookie",
         lucia.createSessionCookie(session.id).serialize()
       )
       .status(200)
-      .json({ message: "Login successful!" })
+      .json({
+        message: "Login successful!",
+        user: {
+          username: user.username,
+          email: user.email,
+          profilePicture: user.profilePicture,
+          biography: user.biography,
+          id: user._id,
+        },
+      })
   } catch {
     res.status(500).send("Internal Server error")
   }
