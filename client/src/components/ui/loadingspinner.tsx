@@ -25,7 +25,15 @@ export function LoadingSpinner({
   )
 
   return fullPage ? (
-    <div className="flex items-center justify-center h-full w-full">
+    <div
+      className={cn(
+        {
+          "bg-black": isDark,
+          "bg-white": !isDark,
+        },
+        "flex items-center justify-center h-screen w-full"
+      )}
+    >
       {spinner}
     </div>
   ) : (
