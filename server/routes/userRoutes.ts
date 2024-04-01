@@ -132,7 +132,7 @@ userRouter.get("/me", isAuthenticated, async (_, res) => {
       const user = await UserModel.findOne({ _id: res.locals.session.userId })
 
       res.status(200).json({
-        name: user?.username,
+        username: user?.username,
         email: user?.email,
         profilePicture: user?.profilePicture,
         biography: user?.biography,
