@@ -10,6 +10,7 @@ import axios, { AxiosError } from "axios"
 import { API_URL } from "@/config"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { cn } from "@/lib/utils"
+import { useEffect } from "react"
 
 type OTPFormData = {
   email: string
@@ -21,19 +22,22 @@ export function OTP() {
   const navigate = useNavigate()
   const { state } = useLocation()
 
-  if (state.email === undefined) {
-    navigate("/")
-    return null
-  }
-
   const verifyEmailAndOTP = async (data: OTPFormData) => {
     await OTPVerifyMutation.mutateAsync(data)
   }
 
+  useEffect(() => {
+    if (!state || state?.email === undefined) {
+      navigate("/", { replace: true })
+    }
+  }, [])
+
+  if (!state || state?.email === undefined) return null
+
   return (
     <div className="flex h-full w-full flex-col gap-5 items-center justify-center">
       <h1 className="text-2xl w-1/2 text-center">
-        We've sent you a 6 digit verification code at {state.email}. Check it
+        We've sent you a 6 digit verification code at {state?.email}. Check it
         and put it here to verify your email.
       </h1>
       <InputOTP
