@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from "react-router-dom"
 import { Button } from "./ui/button"
 import { ThemeChanger } from "./ThemeChanger"
 import { useAuthContext } from "@/contexts/AuthContextProvider"
+import { HeaderAvatar } from "./HeaderAvatar"
 
 export function HeaderLayout() {
   const { pathname } = useLocation()
@@ -27,6 +28,7 @@ export function HeaderLayout() {
             </Link>
           )}
           <ThemeChanger />
+          {user && <HeaderAvatar />}
         </div>
       </header>
       <Outlet />
