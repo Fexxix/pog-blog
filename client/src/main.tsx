@@ -11,6 +11,7 @@ import { HeaderLayout } from "./components/HeaderLayout.tsx"
 import { OTP } from "./pages/otp.tsx"
 import { Login } from "./pages/login.tsx"
 import { Toaster } from "sonner"
+import { Blogs } from "./pages/blogs.tsx"
 
 const browserRouter = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ const browserRouter = createBrowserRouter([
       {
         path: "/login",
         element: <Login />,
+      },
+      {
+        path: "/blogs",
+        element: <Blogs />,
       },
     ],
   },
