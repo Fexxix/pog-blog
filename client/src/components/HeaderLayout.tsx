@@ -1,8 +1,12 @@
-import { Link, Outlet } from "react-router-dom"
+import { Link, Outlet, useLocation } from "react-router-dom"
 import { Button } from "./ui/button"
 import { ThemeChanger } from "./ThemeChanger"
+import { useAuthContext } from "@/contexts/AuthContextProvider"
 
 export function HeaderLayout() {
+  const { pathname } = useLocation()
+  const { user } = useAuthContext()
+
   return (
     <>
       <header className="fixed flex items-center justify-between top-0 w-full px-4 md:px-10 py-2 border-b border-b-neutral-500 z-10">
@@ -17,9 +21,11 @@ export function HeaderLayout() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Link to="/login">
-            <Button>Login</Button>
-          </Link>
+          {pathname !== "/login" && !user && (
+            <Link to="/login">
+              <Button>Login</Button>
+            </Link>
+          )}
           <ThemeChanger />
         </div>
       </header>
