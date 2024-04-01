@@ -15,6 +15,7 @@ import axios, { AxiosError } from "axios"
 import { useMutation } from "@tanstack/react-query"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export type SignupFormData = {
   username: string
@@ -167,6 +168,7 @@ function useSignup() {
           email,
         },
       })
+      toast.success("Account creation done! Please verify your email.")
     },
   })
 }

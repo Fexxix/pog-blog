@@ -17,6 +17,7 @@ import { useMutation } from "@tanstack/react-query"
 import axios, { type AxiosError } from "axios"
 import { useForm } from "react-hook-form"
 import { useLocation, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 type LoginFormData = {
   email: string
@@ -58,7 +59,11 @@ export function Login() {
               <Label htmlFor="email">Email</Label>
               <Input
                 {...register("email", {
-                  pattern: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                  pattern: {
+                    value:
+                      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+                    message: "Invalid email address",
+                  },
                   required: "This field is required!",
                   disabled: loginMutation.isPending,
                   value: (state && state?.email) ?? "",
@@ -147,6 +152,7 @@ function useLogin() {
     onSuccess: ({ user }) => {
       setUser(user)
       navigate("/blogs", { replace: true })
+      toast.success("Logged in!")
     },
   })
 }

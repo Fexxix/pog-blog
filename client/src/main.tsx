@@ -10,6 +10,7 @@ import { Signup } from "./pages/signup.tsx"
 import { HeaderLayout } from "./components/HeaderLayout.tsx"
 import { OTP } from "./pages/otp.tsx"
 import { Login } from "./pages/login.tsx"
+import { Toaster } from "sonner"
 
 const browserRouter = createBrowserRouter([
   {
@@ -45,5 +46,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ThemeProvider>
       </AuthContextProvider>
     </QueryClientProvider>
+    <Toaster theme="system" />
   </React.StrictMode>
 )

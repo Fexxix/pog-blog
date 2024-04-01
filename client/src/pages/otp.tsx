@@ -11,6 +11,7 @@ import { API_URL } from "@/config"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { cn } from "@/lib/utils"
 import { useEffect } from "react"
+import { toast } from "sonner"
 
 type OTPFormData = {
   email: string
@@ -101,6 +102,7 @@ function useOTPVerifyMutation() {
           email,
         },
       })
+      toast.success("Email verification done! Please login.")
     },
   })
 }
