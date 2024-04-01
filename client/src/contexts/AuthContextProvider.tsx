@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react"
 import { API_URL } from "../config"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
 
@@ -14,12 +14,7 @@ type User = {
 
 type AuthContextType = {
   user: User | null
-  login: (loginFormData: LoginFormData) => void
-}
-
-export type LoginFormData = {
-  email: string
-  password: string
+  setUser: (user: User | null) => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -53,12 +48,6 @@ export function AuthContextProvider({
     enabled: privateRoutes.includes(currentRoute),
   })
 
-  const loginMutation = useLogin()
-
-  function login({ email, password }: LoginFormData) {
-    loginMutation.mutate({ email, password })
-  }
-
   if (existingSessionQuery.isLoading) {
     return <LoadingSpinner fullPage />
   }
@@ -82,25 +71,9 @@ export function AuthContextProvider({
   }
 
   const value: AuthContextType = {
-    login,
     user,
+    setUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-function useLogin() {
-  return useMutation({
-    mutationKey: ["login"],
-    mutationFn: async ({ email, password }: LoginFormData) => {
-      await axios.post(
-        `${API_URL}/users/login`,
-        {
-          email,
-          password,
-        },
-        { withCredentials: true }
-      )
-    },
-  })
 }
