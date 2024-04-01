@@ -16,6 +16,7 @@ import { useMutation } from "@tanstack/react-query"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useThemeContext } from "@/contexts/ThemeProvider"
 
 export type SignupFormData = {
   username: string
@@ -25,6 +26,7 @@ export type SignupFormData = {
 
 export function Signup() {
   const signupMutation = useSignup()
+  const { isDark } = useThemeContext()
 
   const {
     register,
@@ -116,7 +118,10 @@ export function Signup() {
               {!signupMutation.isPending ? (
                 "Create an account"
               ) : (
-                <LoadingSpinner className="text-white dark:text-black" />
+                <LoadingSpinner
+                  className="text-white dark:text-black"
+                  isDark={isDark}
+                />
               )}
             </Button>
             {(signupMutation.isSuccess || signupMutation.isError) && (

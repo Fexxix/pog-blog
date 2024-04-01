@@ -12,6 +12,7 @@ import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { cn } from "@/lib/utils"
 import { useEffect } from "react"
 import { toast } from "sonner"
+import { useThemeContext } from "@/contexts/ThemeProvider"
 
 type OTPFormData = {
   email: string
@@ -22,6 +23,7 @@ export function OTP() {
   const OTPVerifyMutation = useOTPVerifyMutation()
   const navigate = useNavigate()
   const { state } = useLocation()
+  const { isDark } = useThemeContext()
 
   const verifyEmailAndOTP = async (data: OTPFormData) => {
     await OTPVerifyMutation.mutateAsync(data)
@@ -65,7 +67,7 @@ export function OTP() {
       )}
       {OTPVerifyMutation.isPending && (
         <div className="flex flex-col gap-2 items-center justify-center">
-          <LoadingSpinner />
+          <LoadingSpinner isDark={isDark} />
           <span>Verifying...</span>
         </div>
       )}

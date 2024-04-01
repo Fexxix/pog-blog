@@ -4,12 +4,12 @@ import { SiSpinrilla } from "react-icons/si"
 export function LoadingSpinner({
   fullPage,
   className,
+  isDark,
 }: {
   fullPage?: boolean
   className?: string
+  isDark: boolean
 }) {
-  const isDark = document.documentElement.classList.contains("dark")
-
   const spinner = (
     <SiSpinrilla
       className={cn(

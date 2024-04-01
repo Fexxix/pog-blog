@@ -48,7 +48,12 @@ export function AuthContextProvider({
   })
 
   if (existingSessionQuery.isLoading) {
-    return <LoadingSpinner fullPage />
+    return (
+      <LoadingSpinner
+        fullPage
+        isDark={window.matchMedia("(prefers-color-scheme: dark)").matches}
+      />
+    )
   }
 
   if (existingSessionQuery.isError) {

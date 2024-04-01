@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { API_URL } from "@/config"
 import { useAuthContext, User } from "@/contexts/AuthContextProvider"
+import { useThemeContext } from "@/contexts/ThemeProvider"
 import { cn } from "@/lib/utils"
 import { useMutation } from "@tanstack/react-query"
 import axios, { type AxiosError } from "axios"
@@ -39,6 +40,7 @@ export function Login() {
     mode: "onBlur",
   })
   const loginMutation = useLogin()
+  const { isDark } = useThemeContext()
 
   const onSubmit = async (data: LoginFormData) => {
     await loginMutation.mutateAsync(data)
@@ -109,7 +111,10 @@ export function Login() {
                 {!loginMutation.isPending ? (
                   "Sign in"
                 ) : (
-                  <LoadingSpinner className="text-white dark:text-black" />
+                  <LoadingSpinner
+                    className="text-white dark:text-black"
+                    isDark={isDark}
+                  />
                 )}
               </Button>
               {(loginMutation.isSuccess || loginMutation.isError) && (
