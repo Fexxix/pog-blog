@@ -45,11 +45,11 @@ const queryClient = new QueryClient()
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthContextProvider>
-        <ThemeProvider>
+      <ThemeProvider>
+        <AuthContextProvider>
           <RouterProvider router={browserRouter} />
-        </ThemeProvider>
-      </AuthContextProvider>
+        </AuthContextProvider>
+      </ThemeProvider>
     </QueryClientProvider>
     <Toaster theme="system" />
   </React.StrictMode>
