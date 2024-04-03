@@ -18,10 +18,9 @@ blogsRouter.get("/", async (req, res) => {
     const blogs = await BlogModel.find()
       .skip(skip)
       .limit(PAGE_SIZE)
+      .select("title description datePublished likes _id author image")
       .populate({ path: "author", select: "username profilePicture" })
       .exec()
-
-    console.log(blogs)
 
     const totalDocuments = await BlogModel.countDocuments()
     const hasMore = page * PAGE_SIZE < totalDocuments
@@ -30,7 +29,7 @@ blogsRouter.get("/", async (req, res) => {
       blogs: blogs.map((blog) => ({
         id: blog._id,
         title: blog.title,
-        content: blog.content,
+        description: blog.description,
         datePublished: blog.datePublished.toISOString(),
         likes: blog.likes?.count ?? 0,
         author: {
