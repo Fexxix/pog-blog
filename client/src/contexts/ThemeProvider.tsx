@@ -1,8 +1,9 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { useLocalStorage } from "@/hooks/useLocalStorage"
+import { createContext, useContext, useEffect } from "react"
 
 type ThemeOptions = "dark" | "light" | "system"
 type ThemeContextType = {
-  theme: ThemeOptions
+  theme: ThemeOptions | undefined
   setTheme: (theme: ThemeOptions) => void
   isDark: boolean
   toggleTheme: (theme: ThemeOptions) => void
@@ -15,7 +16,10 @@ export function useThemeContext() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeOptions>(getTheme("system"))
+  const [theme, setTheme] = useLocalStorage<ThemeOptions>(
+    "theme",
+    getTheme("system")
+  )
 
   const isDark = theme === "dark"
 
@@ -27,7 +31,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = window.document.documentElement
 
     root.classList.remove("light", "dark")
-    root.classList.add(getTheme(theme))
+    root.classList.add(getTheme(theme!))
 
     const themeColor = theme === "dark" ? "black" : "white"
     const themeTextColor = theme === "dark" ? "white" : "black"

@@ -5,6 +5,7 @@ import axios, { AxiosError } from "axios"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { toast } from "sonner"
+import { useThemeContext } from "./ThemeProvider"
 
 export type User = {
   id: string
@@ -33,6 +34,7 @@ export function AuthContextProvider({
 }) {
   const [user, setUser] = useState<User | null>(null)
   const [hasSession, setHasSession] = useLocalStorage("has-session", false)
+  const { isDark } = useThemeContext()
 
   const existingSessionQuery = useQuery<User, AxiosError>({
     queryKey: ["user"],
@@ -48,12 +50,7 @@ export function AuthContextProvider({
   })
 
   if (existingSessionQuery.isLoading) {
-    return (
-      <LoadingSpinner
-        fullPage
-        isDark={window.matchMedia("(prefers-color-scheme: dark)").matches}
-      />
-    )
+    return <LoadingSpinner fullPage isDark={isDark} />
   }
 
   if (existingSessionQuery.isError) {
