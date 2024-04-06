@@ -8,9 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { FaRegUserCircle } from "react-icons/fa"
-import { PiSignOut } from "react-icons/pi"
 import { Link } from "react-router-dom"
+import { SignOutIcon, UserProfileCircle } from "@/lib/icons"
 
 export function HeaderAvatar() {
   const { user } = useAuthContext()
@@ -27,12 +26,12 @@ export function HeaderAvatar() {
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex items-center gap-2">
           <Link className="contents" to={`/@${user?.username}`}>
-            <FaRegUserCircle />
+            <UserProfileCircle />
             Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-          <PiSignOut /> Sign out
+          <SignOutIcon /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

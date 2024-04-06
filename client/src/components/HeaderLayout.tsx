@@ -3,7 +3,7 @@ import { Button } from "./ui/button"
 import { ThemeChanger } from "./ThemeChanger"
 import { useAuthContext } from "@/contexts/AuthContextProvider"
 import { HeaderAvatar } from "./HeaderAvatar"
-import { HiOutlinePencilSquare } from "react-icons/hi2"
+import { Pencil } from "@/lib/icons"
 
 export function HeaderLayout() {
   const { pathname } = useLocation()
@@ -31,7 +31,7 @@ export function HeaderLayout() {
           {user && (
             <Link className="contents" to="/write">
               <Button variant="ghost" className="items-center gap-2 px-2.5">
-                <HiOutlinePencilSquare className="size-5" />
+                <Pencil className="size-5" />
                 <span className="sr-only sm:not-sr-only font-semibold">
                   Write
                 </span>

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Link } from "react-router-dom"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
-import { CiHeart } from "react-icons/ci"
+import { Heart } from "@/lib/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   cn,
@@ -117,7 +117,7 @@ export function BlogCard({ blogData }: { blogData: Blog }) {
           />
         </CardContent>
         <CardFooter className="gap-2">
-          <CiHeart className="size-6" />
+          <Heart className="size-6" />
           <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
           <span className="text-sm sm:text-base">
             {likesAndCommentsCountFormatter.format(blogData.likes)}

@@ -1,18 +1,17 @@
 import { Button } from "@/components/ui/button"
 import { useThemeContext } from "@/contexts/ThemeProvider"
-import { BsSun } from "react-icons/bs"
-import { TbMoonStars } from "react-icons/tb"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Moon, Sun } from "@/lib/icons"
 
 export function ThemeChanger() {
   const { isDark, toggleTheme } = useThemeContext()
 
-  const ThemeIcon = isDark ? TbMoonStars : BsSun
+  const ThemeIcon = isDark ? Moon : Sun
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
