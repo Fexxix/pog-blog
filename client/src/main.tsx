@@ -12,6 +12,7 @@ import { OTP } from "./pages/otp.tsx"
 import { Login } from "./pages/login.tsx"
 import { Toaster } from "sonner"
 import { Blogs } from "./pages/blogs.tsx"
+import { BlogPage } from "./pages/[username].[blog].tsx"
 
 const browserRouter = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const browserRouter = createBrowserRouter([
       {
         path: "/blogs",
         element: <Blogs />,
+      },
+      {
+        path: "/:username/:title",
+        element: <BlogPage />,
       },
     ],
   },
