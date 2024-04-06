@@ -14,7 +14,11 @@ import { Link } from "react-router-dom"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import { CiHeart } from "react-icons/ci"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
+import {
+  cn,
+  likesAndCommentsCountFormatter,
+  publicDateFormatter,
+} from "@/lib/utils"
 
 type Blog = {
   id: string
@@ -34,17 +38,6 @@ type InfiniteBlogList = {
   hasMore: boolean
   nextPage: number
 }
-
-const publicDateFormatter = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-})
-
-const likesCountFormatter = new Intl.NumberFormat("en", {
-  notation: "compact",
-  compactDisplay: "short",
-})
 
 export function Blogs() {
   const {
@@ -86,9 +79,7 @@ export function Blogs() {
 export function BlogCard({ blogData }: { blogData: Blog }) {
   return (
     <Link
-      to={`/blogs/${blogData.author.username}/${blogData.title
-        .replace(/ /g, "-")
-        .toLocaleLowerCase()}`}
+      to={`/${blogData.author.username}/${blogData.title}`.replace(/ /g, "%20")}
       className="contents"
     >
       <Card>
@@ -96,7 +87,7 @@ export function BlogCard({ blogData }: { blogData: Blog }) {
           <div className="flex items-center gap-2 pb-2">
             <Avatar className="size-8">
               <AvatarImage
-                className="bg-zinc-800 rounded-full"
+                className="bg-zinc-200 dark:bg-zinc-800 rounded-full"
                 src={blogData.author.profilePicture}
               />
               <AvatarFallback>{blogData.author.username}</AvatarFallback>
@@ -129,7 +120,7 @@ export function BlogCard({ blogData }: { blogData: Blog }) {
           <CiHeart className="size-6" />
           <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
           <span className="text-sm sm:text-base">
-            {likesCountFormatter.format(blogData.likes)}
+            {likesAndCommentsCountFormatter.format(blogData.likes)}
           </span>
         </CardFooter>
       </Card>
