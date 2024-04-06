@@ -38,6 +38,12 @@ export const BlogModel = model(
       required: true,
       default: () => new Date(),
     },
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "comments",
+      },
+    ],
     likes: LikesSchema,
   } as const)
 )
