@@ -10,7 +10,7 @@ import { Signup } from "./pages/signup.tsx"
 import { HeaderLayout } from "./components/HeaderLayout.tsx"
 import { OTP } from "./pages/otp.tsx"
 import { Login } from "./pages/login.tsx"
-import { Toaster } from "sonner"
+import { Toaster } from "@/components/ui/sonner.tsx"
 import { Blogs } from "./pages/blogs.tsx"
 import { BlogPage } from "./pages/[username].[blog].tsx"
 
@@ -56,6 +56,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </AuthContextProvider>
       </ThemeProvider>
     </QueryClientProvider>
-    <Toaster theme="system" />
+    <Toaster />
   </React.StrictMode>
 )
