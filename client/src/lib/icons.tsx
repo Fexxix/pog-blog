@@ -1,9 +1,33 @@
+import { BiSolidHeart } from "react-icons/bi"
+import { cn } from "./utils"
+
 export { FaRegUserCircle as UserProfileCircle } from "react-icons/fa"
 export { PiSignOut as SignOutIcon } from "react-icons/pi"
 export { HiOutlinePencilSquare as Pencil } from "react-icons/hi2"
 export { BsSun as Sun } from "react-icons/bs"
 export { TbMoonStars as Moon } from "react-icons/tb"
-export { CiHeart as Heart } from "react-icons/ci"
+export { BiSolidHeart } from "react-icons/bi"
+
+export function Heart({
+  filled,
+  className,
+}: {
+  filled: boolean
+  className?: string
+}) {
+  return (
+    <BiSolidHeart
+      className={cn(
+        "size-6",
+        {
+          "stroke-[1.1] fill-transparent stroke-current": !filled,
+          "fill-current stroke-0": filled,
+        },
+        className
+      )}
+    />
+  )
+}
 
 export function CommentBubble() {
   return (
