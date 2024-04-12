@@ -3,6 +3,7 @@ import { BlogModel } from "../models/BlogModel.js"
 import { isAuthenticated } from "../middleware/is-authenticated.js"
 import { CommentModel } from "../models/CommentsModel.js"
 import { UserModel } from "../models/UserModel.js"
+import { Error } from "mongoose"
 
 export const blogsRouter = Router()
 
@@ -34,7 +35,7 @@ blogsRouter.get("/", async (req, res) => {
         title: blog.title,
         description: blog.description,
         datePublished: blog.datePublished.toISOString(),
-        likes: blog.likes?.count ?? 0,
+        likes: blog.likes.length,
         author: {
           // @ts-ignore
           username: blog.author.username,
@@ -42,6 +43,8 @@ blogsRouter.get("/", async (req, res) => {
           profilePicture: blog.author.profilePicture,
         },
         image: blog.image,
+        hasLiked:
+          blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
       })),
       hasMore,
       nextPage: hasMore ? page + 1 : -1,
@@ -53,8 +56,6 @@ blogsRouter.get("/", async (req, res) => {
 
 blogsRouter.get("/:username/:title", async (req, res) => {
   const { username, title } = req.params
-
-  console.log(title)
 
   try {
     const author = await UserModel.findOne({ username })
@@ -77,7 +78,7 @@ blogsRouter.get("/:username/:title", async (req, res) => {
         content: blog.content,
         description: blog.description,
         datePublished: blog.datePublished.toISOString(),
-        likes: blog.likes?.count ?? 0,
+        likes: blog.likes.length,
         comments: blog.comments.length,
         author: {
           // @ts-ignore
@@ -86,6 +87,8 @@ blogsRouter.get("/:username/:title", async (req, res) => {
           profilePicture: blog.author.profilePicture,
         },
         image: blog.image,
+        hasLiked:
+          blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
       })
     }
 
@@ -96,19 +99,35 @@ blogsRouter.get("/:username/:title", async (req, res) => {
   }
 })
 
-// blogsRouter.get("/like/:id", isAuthenticated, async (req, res) => {
-//   const { id } = req.params
+blogsRouter.post("/like/:id", isAuthenticated, async (req, res) => {
+  const { id } = req.params
 
-//   try {
-//     const blog = await BlogModel.updateOne({ _id: id}, {
-//       $inc: {
-//         likes: ""
-//       }
-//     })
-//   } catch {
-//     res.status(500).json({ message: "Internal Server Error!" })
-//   }
-// })
+  try {
+    const blog = await BlogModel.findOneAndUpdate(
+      { _id: id, likes: { $nin: [res.locals.session?.userId] } },
+      {
+        $addToSet: {
+          likes: res.locals.session?.userId,
+        },
+      },
+      {
+        new: true,
+      }
+    )
+      .select("likes")
+      .exec()
+
+    if (blog) res.status(200).json({ likes: blog.likes.length })
+    else
+      res
+        .status(400)
+        .json({ message: "You have already liked this blog" })
+        .end()
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Internal Server Error!" })
+  }
+})
 
 blogsRouter.get("/comments/:id", async (req, res) => {
   const { id } = req.params
