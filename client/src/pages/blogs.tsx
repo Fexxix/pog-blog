@@ -31,6 +31,7 @@ type Blog = {
     profilePicture: string
   }
   datePublished: string
+  hasLiked: boolean
 }
 
 type InfiniteBlogList = {
@@ -48,7 +49,11 @@ export function Blogs() {
   } = useInfiniteQuery<InfiniteBlogList>({
     queryKey: ["blogs"],
     queryFn: async ({ pageParam }) =>
-      (await axios.get(`${API_URL}/blogs?page=${pageParam}`)).data,
+      (
+        await axios.get(`${API_URL}/blogs?page=${pageParam}`, {
+          withCredentials: true,
+        })
+      ).data,
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     refetchOnWindowFocus: false,
@@ -117,7 +122,10 @@ export function BlogCard({ blogData }: { blogData: Blog }) {
           />
         </CardContent>
         <CardFooter className="gap-2">
-          <Heart className="size-6" />
+          <Heart
+            filled={blogData.hasLiked}
+            className={cn({ "text-red-500": blogData.hasLiked })}
+          />
           <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
           <span className="text-sm sm:text-base">
             {likesAndCommentsCountFormatter.format(blogData.likes)}
