@@ -1,16 +1,5 @@
 import { Schema, model } from "mongoose"
 
-const LikesSchema = new Schema({
-  count: {
-    type: Number,
-    default: 0,
-  },
-  likedBy: {
-    type: [{ type: String, ref: "users" }],
-    default: [],
-  },
-})
-
 export const BlogModel = model(
   "blogs",
   new Schema({
@@ -44,6 +33,9 @@ export const BlogModel = model(
         ref: "comments",
       },
     ],
-    likes: LikesSchema,
+    likes: {
+      type: [{ type: String, ref: "users" }],
+      default: [],
+    },
   } as const)
 )
