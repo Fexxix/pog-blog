@@ -5,7 +5,7 @@ import {
   likesAndCommentsCountFormatter,
   publicDateFormatter,
 } from "@/lib/utils"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { useParams } from "react-router-dom"
 import Markdown from "react-markdown"
@@ -14,6 +14,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { toast } from "sonner"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import InfiniteScroll from "react-infinite-scroll-component"
 
 type Blog = {
   id: string
@@ -29,6 +38,17 @@ type Blog = {
   }
   image: string
   hasLiked: boolean
+}
+
+type LikedByUsers = {
+  username: string
+  profilePicture: string
+}
+
+type LikedByUsersInfiniteList = {
+  users: LikedByUsers[]
+  hasMore: boolean
+  nextPage: number | null
 }
 
 function useBlogQuery({
@@ -210,13 +230,101 @@ function Likes({
       >
         <Heart filled={hasLiked} />
       </Button>
-      <Button
-        variant="icon"
-        disabled={likeMutation.isPending}
-        className="text-zinc-400 hover:text-current disabled:text-zinc-600 transition-colors text-sm sm:text-base p-0"
-      >
-        {likesAndCommentsCountFormatter.format(likesToShow)}
-      </Button>
+      <LikedByButton
+        likeMutationIsPending={likeMutation.isPending}
+        likesToShow={likesToShow}
+        blogId={blogId}
+      />
     </>
+  )
+}
+
+function LikedByButton({
+  likesToShow,
+  likeMutationIsPending,
+  blogId,
+}: {
+  likesToShow: number
+  likeMutationIsPending: boolean
+  blogId: string
+}) {
+  const [open, setOpen] = useState(false)
+  const { _, title } = useParams()
+
+  const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
+    useInfiniteQuery<LikedByUsersInfiniteList>({
+      queryKey: ["likedBy", blogId],
+      queryFn: async ({ pageParam }) => {
+        console.log(pageParam)
+        return (
+          await axios.get(
+            `${API_URL}/blogs/likedBy/${blogId}?page=${pageParam}`
+          )
+        ).data
+      },
+      initialPageParam: 1,
+      enabled: open,
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      refetchOnWindowFocus: false,
+    })
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="icon"
+          disabled={likeMutationIsPending}
+          className="text-zinc-400 hover:text-current disabled:text-zinc-600 transition-colors text-sm sm:text-base p-0"
+        >
+          {likesAndCommentsCountFormatter.format(likesToShow)}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="overflow-scroll h-96">
+        <DialogHeader className="py-2 border-b border-b-zinc-200 dark:border-b-zinc-800">
+          <DialogTitle>
+            {likesToShow} people liked{" "}
+            <span className="font-extrabold">&apos;{title}&apos;</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-3">
+          {data?.pages.map((page) =>
+            page.users.map((user) => (
+              <div key={user.username} className="flex gap-3 items-center">
+                <Avatar className="size-8">
+                  <AvatarImage
+                    className="bg-zinc-200 dark:bg-zinc-800 rounded-full"
+                    src={user.profilePicture}
+                  />
+                  <AvatarFallback>{user.username}</AvatarFallback>
+                </Avatar>
+                <div>{user.username}</div>
+              </div>
+            ))
+          )}
+        </div>
+        {(isFetching || isLoading) && <LikedByUsersSkeleton />}
+        {hasNextPage && (
+          <Button
+            disabled={isLoading || isFetching}
+            onClick={() => fetchNextPage()}
+          >
+            Load More
+          </Button>
+        )}{" "}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function LikedByUsersSkeleton() {
+  return (
+    <div className="flex flex-col gap-3 pt-3">
+      {Array.from({ length: 20 }, (_, i) => (
+        <div key={i} className="flex gap-3 items-center">
+          <Skeleton className="size-8 rounded-full" />
+          <Skeleton className="h-2 w-20" />
+        </div>
+      ))}
+    </div>
   )
 }
