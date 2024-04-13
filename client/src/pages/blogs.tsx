@@ -1,6 +1,6 @@
 import { API_URL } from "@/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import InfiniteScroll from "react-infinite-scroll-component"
 import {
   Card,
@@ -41,12 +41,10 @@ type InfiniteBlogList = {
 }
 
 export function Blogs() {
-  const {
-    data,
-    // error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery<InfiniteBlogList>({
+  const { data, error, fetchNextPage, hasNextPage } = useInfiniteQuery<
+    InfiniteBlogList,
+    AxiosError
+  >({
     queryKey: ["blogs"],
     queryFn: async ({ pageParam }) =>
       (
@@ -57,6 +55,7 @@ export function Blogs() {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     refetchOnWindowFocus: false,
+    staleTime: Infinity,
   })
 
   if (!data) {
@@ -64,20 +63,42 @@ export function Blogs() {
   }
 
   return (
-    <InfiniteScroll
-      dataLength={data.pages.length}
-      hasMore={hasNextPage}
-      next={fetchNextPage}
-      loader={<InfiniteBlogsSkeleton />}
-      className="flex flex-col items-center"
-      children={
-        <div className="flex flex-col justify-center gap-5 max-w-full w-4/5 pt-20 size-full">
-          {data.pages.map((page) =>
-            page.blogs.map((blog) => <BlogCard blogData={blog} key={blog.id} />)
-          )}
+    <>
+      <InfiniteScroll
+        dataLength={data.pages.length}
+        hasMore={hasNextPage}
+        next={fetchNextPage}
+        loader={!error && <InfiniteBlogsSkeleton />}
+        className="flex flex-col items-center"
+        children={
+          <div className="flex flex-col justify-center gap-5 max-w-full w-4/5 pt-20 size-full">
+            {data.pages.map((page) =>
+              page.blogs.map((blog) => (
+                <BlogCard blogData={blog} key={blog.id} />
+              ))
+            )}
+          </div>
+        }
+      />
+      {error && (
+        <div className="flex flex-col items-center gap-3 pt-4">
+          <div className="text-2xl font-bold">An Error occured</div>
+          <div>
+            {(() => {
+              if (
+                error.response?.data &&
+                typeof error.response.data === "object" &&
+                "message" in error.response.data
+              ) {
+                return error.response?.data.message as string
+              } else {
+                return error.message
+              }
+            })()}
+          </div>
         </div>
-      }
-    />
+      )}
+    </>
   )
 }
 
