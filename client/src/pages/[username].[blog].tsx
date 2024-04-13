@@ -33,10 +33,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { Input } from "@/components/ui/input"
 import { useAuthContext } from "@/contexts/AuthContextProvider"
 import { Separator } from "@/components/ui/separator"
 import { useForm } from "react-hook-form"
+import { Textarea } from "@/components/ui/textarea"
 
 type Blog = {
   id: string
@@ -278,11 +278,10 @@ function LikedByButton({
   const [open, setOpen] = useState(false)
   const { title } = useParams()
 
-  const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
-    useInfiniteQuery<LikedByUsersInfiniteList>({
+  const { data, fetchNextPage, hasNextPage, isFetching, isLoading, error } =
+    useInfiniteQuery<LikedByUsersInfiniteList, AxiosError>({
       queryKey: ["likedBy", blogId],
       queryFn: async ({ pageParam }) => {
-        console.log(pageParam)
         return (
           await axios.get(
             `${API_URL}/blogs/likedBy/${blogId}?page=${pageParam}`
@@ -330,6 +329,27 @@ function LikedByButton({
           )}
         </div>
         {(isFetching || isLoading) && <LikedByUsersSkeleton />}
+        {error && (
+          <div className="flex flex-col items-center gap-3 pt-4">
+            <div className="text-2xl font-bold">An Error occured</div>
+            <div>
+              {(() => {
+                if (
+                  error.response?.data &&
+                  typeof error.response.data === "object" &&
+                  "message" in error.response.data
+                ) {
+                  return error.response?.data.message as string
+                } else {
+                  return error.message
+                }
+              })()}
+            </div>
+            <div className="text-sm">
+              Try again by pressing the &apos;Load More&apos; button
+            </div>
+          </div>
+        )}
         {hasNextPage && (
           <Button
             disabled={isLoading || isFetching}
@@ -365,10 +385,12 @@ function CommentsButton({
 }) {
   const { user } = useAuthContext()
   const [open, setOpen] = useState(false)
-  const { register, handleSubmit, reset } = useForm<{ content: string }>({})
+  const { register, handleSubmit, reset } = useForm<{
+    content: string
+  }>()
   const queryClient = useQueryClient()
 
-  const commentsQuery = useInfiniteQuery<InfiniteCommentsList>({
+  const commentsQuery = useInfiniteQuery<InfiniteCommentsList, AxiosError>({
     queryKey: ["comments", blogId],
     queryFn: async ({ pageParam }) => {
       return (
@@ -378,11 +400,12 @@ function CommentsButton({
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 1,
     refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     enabled: open,
   })
 
   const commentsMutation = useMutation<
-    any,
+    { comments: number },
     AxiosError | Error,
     { content: string }
   >({
@@ -406,6 +429,23 @@ function CommentsButton({
       toast.dismiss(loadingToastId as number)
       reset()
     },
+    onError: (error, _, loadingToastId) => {
+      const errorMsg = (() => {
+        if (
+          error instanceof AxiosError &&
+          error.response?.data &&
+          typeof error.response.data === "object" &&
+          "message" in error.response.data
+        ) {
+          return error.response?.data.message as string
+        } else {
+          return error.message
+        }
+      })()
+
+      toast.dismiss(loadingToastId as number)
+      toast.error(errorMsg)
+    },
   })
 
   const onSubmit = async ({ content }: { content: string }) => {
@@ -420,6 +460,10 @@ function CommentsButton({
     await commentsMutation.mutateAsync({ content })
   }
 
+  const numberOfCommentsToShow = likesAndCommentsCountFormatter.format(
+    commentsMutation.data?.comments ?? numberOfComments
+  )
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -428,14 +472,12 @@ function CommentsButton({
           className="flex items-center gap-2 text-zinc-400 hover:text-current transition-colors p-0"
         >
           <CommentBubble />
-          <span className="text-sm sm:text-base">
-            {likesAndCommentsCountFormatter.format(numberOfComments)}
-          </span>
+          <span className="text-sm sm:text-base">{numberOfCommentsToShow}</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="overflow-scroll w-full sm:w-[540px">
         <SheetHeader>
-          <SheetTitle>Comments ({numberOfComments})</SheetTitle>
+          <SheetTitle>Comments ({numberOfCommentsToShow})</SheetTitle>
           {user && (
             <>
               <form
@@ -452,27 +494,16 @@ function CommentsButton({
                   </Avatar>
                   <span>{user.username}</span>
                 </div>
-                <Input
+                <Textarea
                   {...register("content", {
                     disabled: commentsMutation.isPending,
                   })}
                   placeholder="What are your thoughts?"
                 />
-                <div className="flex justify-end items-center pt-2">
-                  <Button
-                    disabled={!commentsMutation.isPending}
-                    type="button"
-                    variant="secondary"
-                    className="mr-2"
-                  >
-                    Cancel
-                  </Button>
-                  <Button disabled={commentsMutation.isPending} type="submit">
-                    Comment
-                  </Button>
-                </div>
+                <Button disabled={commentsMutation.isPending} type="submit">
+                  Comment
+                </Button>
               </form>
-              <Separator />
             </>
           )}
           <div className="flex flex-col gap-3 pt-4">
@@ -522,6 +553,28 @@ function CommentsButton({
                 {commentsQuery.data && <Separator />}
                 <CommentsSkeleton />
               </>
+            )}
+            {commentsQuery.error && (
+              <div className="flex flex-col items-center gap-3 pt-4">
+                <div className="text-2xl font-bold">An Error occured</div>
+                <div>
+                  {(() => {
+                    if (
+                      commentsQuery.error.response?.data &&
+                      typeof commentsQuery.error.response.data === "object" &&
+                      "message" in commentsQuery.error.response.data
+                    ) {
+                      return commentsQuery.error.response?.data
+                        .message as string
+                    } else {
+                      return commentsQuery.error.message
+                    }
+                  })()}
+                </div>
+                <div className="text-sm">
+                  Try again by pressing the &apos;Load More&apos; button
+                </div>
+              </div>
             )}
             {commentsQuery.hasNextPage && (
               <Button
