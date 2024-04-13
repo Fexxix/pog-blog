@@ -5,7 +5,12 @@ import {
   likesAndCommentsCountFormatter,
   publicDateFormatter,
 } from "@/lib/utils"
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query"
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { useParams } from "react-router-dom"
 import Markdown from "react-markdown"
@@ -17,12 +22,21 @@ import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import InfiniteScroll from "react-infinite-scroll-component"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Input } from "@/components/ui/input"
+import { useAuthContext } from "@/contexts/AuthContextProvider"
+import { Separator } from "@/components/ui/separator"
+import { useForm } from "react-hook-form"
 
 type Blog = {
   id: string
@@ -50,6 +64,24 @@ type LikedByUsersInfiniteList = {
   hasMore: boolean
   nextPage: number | null
 }
+
+type Comment = {
+  id: string
+  content: string
+  author: {
+    username: string
+    profilePicture: string
+  }
+  datePosted: string
+}
+
+type InfiniteCommentsList = {
+  comments: Comment[]
+  hasMore: boolean
+  nextPage: number | null
+}
+
+const MAX_COMMENT_CHARACTERS = 1000
 
 function useBlogQuery({
   username,
@@ -109,15 +141,10 @@ export function BlogPage() {
             alreadyLiked={blogQuery.data.hasLiked}
           />
         </div>
-        <Button
-          variant="icon"
-          className="flex items-center gap-2 text-zinc-400 hover:text-current transition-colors p-0"
-        >
-          <CommentBubble />
-          <span className="text-sm sm:text-base">
-            {likesAndCommentsCountFormatter.format(blogQuery.data.comments)}
-          </span>
-        </Button>
+        <CommentsButton
+          numberOfComments={blogQuery.data.comments}
+          blogId={blogQuery.data.id}
+        />
       </div>
       <div className="flex justify-center items-center mt-8">
         <img
@@ -249,7 +276,7 @@ function LikedByButton({
   blogId: string
 }) {
   const [open, setOpen] = useState(false)
-  const { _, title } = useParams()
+  const { title } = useParams()
 
   const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
     useInfiniteQuery<LikedByUsersInfiniteList>({
@@ -324,6 +351,207 @@ function LikedByUsersSkeleton() {
           <Skeleton className="size-8 rounded-full" />
           <Skeleton className="h-2 w-20" />
         </div>
+      ))}
+    </div>
+  )
+}
+
+function CommentsButton({
+  numberOfComments,
+  blogId,
+}: {
+  numberOfComments: number
+  blogId: string
+}) {
+  const { user } = useAuthContext()
+  const [open, setOpen] = useState(false)
+  const { register, handleSubmit, reset } = useForm<{ content: string }>({})
+  const queryClient = useQueryClient()
+
+  const commentsQuery = useInfiniteQuery<InfiniteCommentsList>({
+    queryKey: ["comments", blogId],
+    queryFn: async ({ pageParam }) => {
+      return (
+        await axios.get(`${API_URL}/blogs/comments/${blogId}?page=${pageParam}`)
+      ).data
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 1,
+    refetchOnWindowFocus: false,
+    enabled: open,
+  })
+
+  const commentsMutation = useMutation<
+    any,
+    AxiosError | Error,
+    { content: string }
+  >({
+    mutationKey: ["comments", blogId],
+    mutationFn: async ({ content }) => {
+      return (
+        await axios.post(
+          `${API_URL}/blogs/comment/${blogId}`,
+          { content },
+          { withCredentials: true }
+        )
+      ).data
+    },
+    onMutate: () => {
+      return toast.loading("Posting comment...")
+    },
+    onSuccess: (_, __, loadingToastId) => {
+      queryClient.invalidateQueries({ queryKey: ["comments", blogId] })
+      commentsQuery.refetch()
+
+      toast.dismiss(loadingToastId as number)
+      reset()
+    },
+  })
+
+  const onSubmit = async ({ content }: { content: string }) => {
+    if (!content) {
+      return toast.error("Comment cannot be empty!")
+    }
+
+    if (content.length > MAX_COMMENT_CHARACTERS) {
+      return toast.error("Comment too long. Max 1000 characters.")
+    }
+
+    await commentsMutation.mutateAsync({ content })
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="icon"
+          className="flex items-center gap-2 text-zinc-400 hover:text-current transition-colors p-0"
+        >
+          <CommentBubble />
+          <span className="text-sm sm:text-base">
+            {likesAndCommentsCountFormatter.format(numberOfComments)}
+          </span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="overflow-scroll w-full sm:w-[540px">
+        <SheetHeader>
+          <SheetTitle>Comments ({numberOfComments})</SheetTitle>
+          {user && (
+            <>
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-2"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-8">
+                    <AvatarImage
+                      className="bg-zinc-200 dark:bg-zinc-800"
+                      src={user.profilePicture}
+                    />
+                    <AvatarFallback>{user.username}</AvatarFallback>
+                  </Avatar>
+                  <span>{user.username}</span>
+                </div>
+                <Input
+                  {...register("content", {
+                    disabled: commentsMutation.isPending,
+                  })}
+                  placeholder="What are your thoughts?"
+                />
+                <div className="flex justify-end items-center pt-2">
+                  <Button
+                    disabled={!commentsMutation.isPending}
+                    type="button"
+                    variant="secondary"
+                    className="mr-2"
+                  >
+                    Cancel
+                  </Button>
+                  <Button disabled={commentsMutation.isPending} type="submit">
+                    Comment
+                  </Button>
+                </div>
+              </form>
+              <Separator />
+            </>
+          )}
+          <div className="flex flex-col gap-3 pt-4">
+            {commentsQuery.data?.pages.map((page, pageIndex) => (
+              <>
+                {page.comments.map((comment, pageCommentIndex) => (
+                  <>
+                    <div key={comment.id} className="flex flex-col gap-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-8">
+                          <AvatarImage
+                            className="bg-zinc-200 dark:bg-zinc-800"
+                            src={comment.author.profilePicture}
+                          />
+                          <AvatarFallback>
+                            {comment.author.username}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="text-sm">
+                            {comment.author.username}
+                          </span>
+                          <span className="text-xs">
+                            {publicDateFormatter.format(
+                              new Date(comment.datePosted)
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-left text-truncate">
+                        {comment.content}
+                      </p>
+                    </div>
+                    {pageCommentIndex !== page.comments.length - 1 && (
+                      <Separator />
+                    )}
+                  </>
+                ))}
+                {pageIndex !== commentsQuery.data.pages.length - 1 && (
+                  <Separator />
+                )}
+              </>
+            ))}
+
+            {(commentsQuery.isFetching || commentsQuery.isLoading) && (
+              <>
+                {commentsQuery.data && <Separator />}
+                <CommentsSkeleton />
+              </>
+            )}
+            {commentsQuery.hasNextPage && (
+              <Button
+                disabled={commentsQuery.isLoading || commentsQuery.isFetching}
+                onClick={() => commentsQuery.fetchNextPage()}
+              >
+                Load More
+              </Button>
+            )}
+          </div>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+function CommentsSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      {Array.from({ length: 10 }, (_, i) => (
+        <>
+          <div key={i} className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-8 rounded-full" />
+              <Skeleton className="h-2 w-20" />
+            </div>
+            <Skeleton className="h-5 w-full" />
+          </div>
+          {i !== 9 && <Separator />}
+        </>
       ))}
     </div>
   )
