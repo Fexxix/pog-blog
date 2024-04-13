@@ -1,8 +1,14 @@
-import { Router } from "express"
+import { Router, type Request } from "express"
 import { BlogModel } from "../models/BlogModel.js"
 import { isAuthenticated } from "../middleware/is-authenticated.js"
 import { CommentModel } from "../models/CommentsModel.js"
 import { UserModel } from "../models/UserModel.js"
+
+interface CommentPostRequest extends Request {
+  body: {
+    content: string
+  }
+}
 
 export const blogsRouter = Router()
 
@@ -125,6 +131,7 @@ blogsRouter.get("/comments/:id", async (req, res) => {
 
   try {
     const comments = await CommentModel.find({ blog: id })
+      .sort({ datePosted: -1 })
       .skip(skip)
       .limit(PAGE_SIZE)
       .populate({ path: "author", select: "username profilePicture" })
@@ -137,6 +144,7 @@ blogsRouter.get("/comments/:id", async (req, res) => {
 
     res.json({
       comments: comments.map((c) => ({
+        id: c._id,
         content: c.content,
         author: {
           // @ts-ignore
@@ -153,6 +161,44 @@ blogsRouter.get("/comments/:id", async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error!" })
   }
 })
+
+const MAX_COMMENT_CHARS = 1000
+
+blogsRouter.post(
+  "/comment/:id",
+  isAuthenticated,
+  async (req: CommentPostRequest, res) => {
+    const { id } = req.params
+    const { content } = req.body
+
+    if (content.length > MAX_COMMENT_CHARS) {
+      return res.status(400).json({ message: "Comment too long!" })
+    }
+
+    try {
+      const newComment = await CommentModel.create({
+        content,
+        author: res.locals.session?.userId ?? "",
+        blog: id,
+        datePosted: new Date(),
+      })
+
+      await BlogModel.findOneAndUpdate(
+        { _id: id },
+        {
+          $addToSet: {
+            comments: newComment._id,
+          },
+        }
+      )
+
+      res.status(200).end()
+    } catch (e) {
+      console.error("Error while creating comment: ", e)
+      return res.status(500).json({ message: "Internal Server Error!" })
+    }
+  }
+)
 
 blogsRouter.get("/:username/:title", async (req, res) => {
   const { username, title } = req.params
