@@ -183,16 +183,19 @@ blogsRouter.post(
         datePosted: new Date(),
       })
 
-      await BlogModel.findOneAndUpdate(
+      const updateBlog = await BlogModel.findOneAndUpdate(
         { _id: id },
         {
           $addToSet: {
             comments: newComment._id,
           },
+        },
+        {
+          new: true,
         }
       )
 
-      res.status(200).end()
+      res.status(200).json({ comments: updateBlog?.comments.length })
     } catch (e) {
       console.error("Error while creating comment: ", e)
       return res.status(500).json({ message: "Internal Server Error!" })
