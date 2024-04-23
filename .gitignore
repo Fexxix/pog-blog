@@ -2,10 +2,8 @@
 /server/node_modules
 /server/build
 /server/.env
-/server/models/seed*.ts
-/server/models/seed*2.ts
-/server/models/*.json
-/server/models/*.js
+/server/models/db_seeders
+/server/models/db_seeders/**
 
 # client
 /client/node_modules
