@@ -13,6 +13,8 @@ import { Login } from "./pages/login.tsx"
 import { Toaster } from "@/components/ui/sonner.tsx"
 import { Blogs } from "./pages/blogs.tsx"
 import { BlogPage } from "./pages/[username].[blog].tsx"
+import { WritePage } from "./pages/write.tsx"
+import { PrivateRoute } from "./components/PrivateRoute.tsx"
 
 const browserRouter = createBrowserRouter([
   {
@@ -41,6 +43,14 @@ const browserRouter = createBrowserRouter([
       {
         path: "/:username/:title",
         element: <BlogPage />,
+      },
+      {
+        path: "/write",
+        element: (
+          <PrivateRoute>
+            <WritePage />
+          </PrivateRoute>
+        ),
       },
     ],
   },
