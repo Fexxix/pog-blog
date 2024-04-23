@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node --experimental-web-crypto dist/index.js"
   },
   "module": "ESNext",
   "keywords": [],

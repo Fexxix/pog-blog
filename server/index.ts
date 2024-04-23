@@ -6,6 +6,9 @@ import { lucia } from "./lib/auth.js"
 import { Session } from "lucia"
 import { blogsRouter } from "./routes/blogRoutes.js"
 import cors from "cors"
+import { webcrypto } from "node:crypto"
+
+globalThis.crypto = webcrypto as Crypto
 
 config()
 
