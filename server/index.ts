@@ -11,8 +11,6 @@ config()
 
 const app = express()
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
-app.use(express.json())
 app.use(async (req, res, next) => {
   const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "")
 
@@ -36,6 +34,8 @@ app.use(async (req, res, next) => {
   res.locals.user = user
   return next()
 })
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
+app.use(express.json())
 app.use("/users", userRouter)
 app.use("/blogs", blogsRouter)
 
