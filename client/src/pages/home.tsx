@@ -19,7 +19,7 @@ export default function Home() {
             </Button>
           </Link>
           <Link to="/signup">
-            <Button className="text-md" size="lg">
+            <Button variant="outline" className="text-md" size="lg">
               Sign Up
             </Button>
           </Link>
