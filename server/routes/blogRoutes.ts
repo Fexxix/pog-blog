@@ -25,6 +25,7 @@ blogsRouter.get("/", async (req, res) => {
 
   try {
     const blogs = await BlogModel.find()
+      .sort({ datePublished: -1 })
       .skip(skip)
       .limit(PAGE_SIZE)
       .select("title description datePublished likes _id author image")
@@ -245,5 +246,38 @@ blogsRouter.get("/:username/:title", async (req, res) => {
   } catch (e) {
     console.error(e)
     res.status(500).json({ message: "Internal Server Error!" })
+  }
+})
+
+blogsRouter.post("/add", isAuthenticated, async (req, res) => {
+  const { title, content, description, image } = req.body
+
+  if (!title || !content || !description) {
+    return res.status(400).json({ message: "Missing required fields!" })
+  }
+
+  if (title.length > 100) {
+    return res.status(400).json({ message: "Title too long!" })
+  }
+
+  if (description.length > 500) {
+    return res.status(400).json({ message: "Description too long!" })
+  }
+
+  try {
+    await BlogModel.create({
+      title,
+      content,
+      description,
+      datePublished: new Date(),
+      author: res.locals.session?.userId ?? "",
+      image,
+      likes: [],
+      comments: [],
+    })
+
+    res.status(200).json({ message: "Blog created successfully!" })
+  } catch {
+    return res.status(500).json({ message: "Internal Server Error!" })
   }
 })
