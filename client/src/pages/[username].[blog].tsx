@@ -13,7 +13,6 @@ import {
 } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { useParams } from "react-router-dom"
-import Markdown from "react-markdown"
 import { CommentBubble, Heart } from "@/lib/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
@@ -153,9 +152,10 @@ export function BlogPage() {
           className="object-cover"
         />
       </div>
-      <Markdown className="prose prose-neutral prose-pre:bg-zinc-100 prose-pre:text-black dark:prose-pre:text-current dark:prose-pre:bg-zinc-800 dark:prose-invert mt-8">
-        {blogQuery.data.content}
-      </Markdown>
+      <div
+        dangerouslySetInnerHTML={{ __html: blogQuery.data.content }}
+        className="prose prose-neutral prose-pre:bg-zinc-100 prose-pre:text-black dark:prose-pre:text-current dark:prose-pre:bg-zinc-800 dark:prose-invert mt-8"
+      />
     </div>
   )
 }
