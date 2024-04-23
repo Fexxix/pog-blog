@@ -4,6 +4,7 @@ import { ThemeChanger } from "./ThemeChanger"
 import { useAuthContext } from "@/contexts/AuthContextProvider"
 import { HeaderAvatar } from "./HeaderAvatar"
 import { Pencil } from "@/lib/icons"
+import { cn } from "@/lib/utils"
 
 export function HeaderLayout() {
   const { pathname } = useLocation()
@@ -11,7 +12,14 @@ export function HeaderLayout() {
 
   return (
     <>
-      <header className="fixed flex items-center bg-white dark:bg-zinc-950 justify-between top-0 w-full px-4 md:px-10 py-2 border-b border-b-zinc-200 dark:border-b-zinc-800 z-10">
+      <header
+        className={cn(
+          "fixed flex items-center bg-white dark:bg-zinc-950 justify-between top-0 w-full px-4 md:px-10 py-2 border-b border-b-zinc-200 dark:border-b-zinc-800 z-10",
+          {
+            absolute: pathname === "/write",
+          }
+        )}
+      >
         <div className="flex items-center gap-3">
           <img
             className="size-8 md:size-10 invert dark:invert-0"
@@ -28,7 +36,13 @@ export function HeaderLayout() {
               <Button>Login</Button>
             </Link>
           )}
-          {user && (
+          {pathname === "/write" && (
+            <>
+              <div id="publishBtnContainer" className="contents" />
+              <div id="writePageOptionsContainer" className="contents" />
+            </>
+          )}
+          {user && pathname !== "/write" && (
             <Link className="contents" to="/write">
               <Button variant="ghost" className="items-center gap-2 px-2.5">
                 <Pencil className="size-5" />
