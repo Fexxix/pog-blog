@@ -79,7 +79,7 @@ userRouter.post("/login", async (req, res) => {
   const { email = "", password = "" } = req.body
 
   if (!email || typeof email !== "string" || !isValidEmail(email)) {
-    return res.status(400).send("Invalid email")
+    return res.status(400).json({ message: "Invalid email" })
   }
 
   if (
@@ -87,20 +87,20 @@ userRouter.post("/login", async (req, res) => {
     typeof password !== "string" ||
     password.length < MIN_PASSWORD_LENGTH
   ) {
-    return res.status(400).send("Invalid password")
+    return res.status(400).json({ message: "Invalid password" })
   }
 
   try {
     const user = await UserModel.findOne({ email })
 
     if (!user) {
-      return res.status(400).send("User does not exist")
+      return res.status(400).json({ message: "User does not exist" })
     }
 
     const validPassword = await argon2id.verify(user.password, password)
 
     if (!validPassword) {
-      return res.status(400).send("Invalid email or password")
+      return res.status(400).json({ message: "Invalid email or password" })
     }
 
     const session = await lucia.createSession(user._id, {})
@@ -122,7 +122,7 @@ userRouter.post("/login", async (req, res) => {
         },
       })
   } catch {
-    res.status(500).send("Internal Server error")
+    res.status(500).json({ message: "Internal Server error" })
   }
 })
 
