@@ -5,12 +5,8 @@
       "destination": "/index.html"
     },
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "destination": "https://pog-blog-production.up.railway.app/:path*"
-    },
-    {
-      "source": "/api/:path*/",
-      "destination": "https://pog-blog-production.up.railway.app/:path*/"
     }
   ]
 }
