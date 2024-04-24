@@ -6,7 +6,7 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "https://pog-blog-production.up.railway.app/:path*"
+      "destination": "https://pog-blog-production.up.railway.app/$1"
     }
   ]
 }
