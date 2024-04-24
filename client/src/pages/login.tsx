@@ -63,7 +63,7 @@ export function Login() {
                   pattern: {
                     value:
                       /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
-                    message: "Invalid email address!",
+                    message: "Invalid Email address!",
                   },
                   required: "This field is required!",
                   disabled: loginMutation.isPending,
