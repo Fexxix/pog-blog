@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { API_URL } from "@/config"
 import {
   cn,
   likesAndCommentsCountFormatter,
@@ -93,7 +92,7 @@ function useBlogQuery({
     queryKey: [username, title],
     queryFn: async () => {
       return (
-        await axios.get(`${API_URL}/blogs/${username}/${title}`, {
+        await axios.get(`/api/blogs/${username}/${title}`, {
           withCredentials: true,
         })
       ).data
@@ -211,7 +210,7 @@ function Likes({
     mutationFn: async () => {
       return (
         await axios.post(
-          `${API_URL}/blogs/like/${blogId}`,
+          `/api/blogs/like/${blogId}`,
           {},
           { withCredentials: true }
         )
@@ -283,9 +282,7 @@ function LikedByButton({
       queryKey: ["likedBy", blogId],
       queryFn: async ({ pageParam }) => {
         return (
-          await axios.get(
-            `${API_URL}/blogs/likedBy/${blogId}?page=${pageParam}`
-          )
+          await axios.get(`/api/blogs/likedBy/${blogId}?page=${pageParam}`)
         ).data
       },
       initialPageParam: 1,
@@ -394,7 +391,7 @@ function CommentsButton({
     queryKey: ["comments", blogId],
     queryFn: async ({ pageParam }) => {
       return (
-        await axios.get(`${API_URL}/blogs/comments/${blogId}?page=${pageParam}`)
+        await axios.get(`/api/blogs/comments/${blogId}?page=${pageParam}`)
       ).data
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -413,7 +410,7 @@ function CommentsButton({
     mutationFn: async ({ content }) => {
       return (
         await axios.post(
-          `${API_URL}/blogs/comment/${blogId}`,
+          `/api/blogs/comment/${blogId}`,
           { content },
           { withCredentials: true }
         )

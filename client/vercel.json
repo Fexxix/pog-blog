@@ -3,6 +3,10 @@
     {
       "source": "/(.*)",
       "destination": "/index.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://pog-blog-production.up.railway.app/:path*"
     }
   ]
 }

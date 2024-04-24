@@ -7,7 +7,6 @@ import {
 import { REGEXP_ONLY_DIGITS } from "input-otp"
 import { useMutation } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
-import { API_URL } from "@/config"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { cn } from "@/lib/utils"
 import { useEffect } from "react"
@@ -95,7 +94,7 @@ function useOTPVerifyMutation() {
   return useMutation<any, AxiosError, OTPFormData>({
     mutationKey: ["otp"],
     mutationFn: async (data) => {
-      return (await axios.post(`${API_URL}/users/verify-email`, data)).data
+      return (await axios.post(`/api/users/verify-email`, data)).data
     },
     onSuccess: (_, { email }) => {
       navigate("/login", {

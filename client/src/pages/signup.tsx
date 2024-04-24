@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
-import { API_URL } from "@/config"
 import axios, { AxiosError } from "axios"
 import { useMutation } from "@tanstack/react-query"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
@@ -75,7 +74,11 @@ export function Signup() {
               <Label htmlFor="email">Email</Label>
               <Input
                 {...register("email", {
-                  pattern: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                  pattern: {
+                    value:
+                      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+                    message: "Please enter a valid email address",
+                  },
                   required: "This field is required!",
                   disabled: signupMutation.isPending,
                 })}
@@ -156,7 +159,7 @@ function useSignup() {
     mutationFn: async ({ email, password, username }) => {
       return (
         await axios.post(
-          `${API_URL}/users/signup`,
+          `/api/users/signup`,
           {
             email,
             password,

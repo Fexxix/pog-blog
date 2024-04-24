@@ -1,5 +1,4 @@
 import { createContext, useContext, useState } from "react"
-import { API_URL } from "../config"
 import { useQuery } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
@@ -40,7 +39,7 @@ export function AuthContextProvider({
     queryKey: ["user"],
     queryFn: async () => {
       return (
-        await axios.get(`${API_URL}/users/me`, {
+        await axios.get(`/api/users/me`, {
           withCredentials: true,
         })
       ).data

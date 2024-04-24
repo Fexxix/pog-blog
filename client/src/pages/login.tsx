@@ -10,7 +10,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LoadingSpinner } from "@/components/ui/loadingspinner"
-import { API_URL } from "@/config"
 import { useAuthContext, User } from "@/contexts/AuthContextProvider"
 import { useThemeContext } from "@/contexts/ThemeProvider"
 import { cn } from "@/lib/utils"
@@ -145,7 +144,7 @@ function useLogin() {
     mutationFn: async ({ email, password }) => {
       return (
         await axios.post(
-          `${API_URL}/users/login`,
+          `/api/users/login`,
           {
             email,
             password,

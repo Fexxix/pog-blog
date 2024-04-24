@@ -13,7 +13,7 @@ export const lucia = new Lucia(adapter, {
     attributes: {
       secure: process.env.NODE_ENV === "production",
       // @ts-ignore
-      sameSite: "partitioned",
+      sameSite: "none",
     },
   },
   sessionExpiresIn: new TimeSpan(2, "w"),

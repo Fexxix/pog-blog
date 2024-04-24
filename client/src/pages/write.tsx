@@ -60,7 +60,6 @@ import { BookOpenCheck } from "lucide-react"
 import { toast } from "sonner"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
-import { API_URL } from "@/config"
 import { useNavigate } from "react-router-dom"
 
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
@@ -89,7 +88,7 @@ function useBlogsMutation() {
     mutationKey: ["blogs"],
     mutationFn: async ({ content, description, image, title }) => {
       return await axios.post(
-        `${API_URL}/blogs/add`,
+        `/api/blogs/add`,
         {
           content,
           description,

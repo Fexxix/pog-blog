@@ -5,10 +5,9 @@ import { userRouter } from "./routes/userRoutes.js"
 import { lucia } from "./lib/auth.js"
 import { Session } from "lucia"
 import { blogsRouter } from "./routes/blogRoutes.js"
-import cors from "cors"
-import { webcrypto } from "node:crypto"
+// import { webcrypto } from "node:crypto"
 
-globalThis.crypto = webcrypto as Crypto
+// globalThis.crypto = webcrypto as Crypto
 
 config()
 
@@ -37,7 +36,6 @@ app.use(async (req, res, next) => {
   res.locals.user = user
   return next()
 })
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(express.json())
 app.use("/users", userRouter)
 app.use("/blogs", blogsRouter)

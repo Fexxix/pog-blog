@@ -1,4 +1,3 @@
-import { API_URL } from "@/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import InfiniteScroll from "react-infinite-scroll-component"
@@ -48,7 +47,7 @@ export function Blogs() {
     queryKey: ["blogs"],
     queryFn: async ({ pageParam }) =>
       (
-        await axios.get(`${API_URL}/blogs?page=${pageParam}`, {
+        await axios.get(`/api/blogs?page=${pageParam}`, {
           withCredentials: true,
         })
       ).data,
