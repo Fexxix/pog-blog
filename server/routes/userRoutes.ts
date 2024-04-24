@@ -68,7 +68,8 @@ userRouter.post("/signup", async (req, res) => {
       validationCode: validationCodeDoc.code,
     })
     res.status(200).json({ message: "Email sent successfully." })
-  } catch {
+  } catch (err) {
+    console.error("Error while logging in: ", err)
     return res.status(500).json({
       message: "Error while sending email. Make sure it is a valid email.",
     })
@@ -121,7 +122,8 @@ userRouter.post("/login", async (req, res) => {
           id: user._id,
         },
       })
-  } catch {
+  } catch (err) {
+    console.error("Error while logging in: ", err)
     res.status(500).json({ message: "Internal Server error" })
   }
 })
@@ -138,7 +140,8 @@ userRouter.get("/me", isAuthenticated, async (_, res) => {
         biography: user?.biography,
         id: user?._id,
       })
-    } catch {
+    } catch (err) {
+      console.error("Error while logging in: ", err)
       res.status(500).json({ message: "Something went wrong!" })
     }
   }
