@@ -113,7 +113,7 @@ export function BlogCard({ blogData }: { blogData: Blog }) {
           <div className="flex items-center gap-2 pb-2">
             <Avatar className="size-8">
               <AvatarImage
-                className="bg-zinc-200 dark:bg-zinc-800 rounded-full"
+                className="bg-zinc-200 dark:bg-zinc-800 size-full rounded-full"
                 src={blogData.author.profilePicture}
               />
               <AvatarFallback>{blogData.author.username}</AvatarFallback>
