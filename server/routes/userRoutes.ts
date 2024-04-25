@@ -7,6 +7,7 @@ import { UserModel } from "../models/UserModel.js"
 import { isAuthenticated } from "../middleware/is-authenticated.js"
 import { ValidationCodeModel } from "../models/ValidationCodeModel.js"
 import { sendVerificationEmail } from "../controllers/sendEmail.js"
+import { BlogModel } from "../models/BlogModel.js"
 
 export const userRouter = Router()
 const MIN_PASSWORD_LENGTH = 6
@@ -179,5 +180,43 @@ userRouter.post("/verify-email", async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: "Internal server error." })
+  }
+})
+
+userRouter.get("/:username", async (req, res) => {
+  const { username } = req.params
+
+  try {
+    const user = await UserModel.findOne({ username })
+
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist!" })
+    }
+
+    const isProfileOwner = res.locals.session?.userId === user._id
+
+    const userBlogs = await BlogModel.find({ author: user._id })
+      .sort({ datePublished: -1 })
+      .limit(20)
+
+    res.status(200).json({
+      username: user.username,
+      profilePicture: user.profilePicture,
+      biography: user.biography,
+      id: user._id,
+      blogs: userBlogs.map((blog) => ({
+        id: blog._id,
+        title: blog.title,
+        description: blog.description,
+        datePublished: blog.datePublished.toISOString(),
+        likes: blog.likes.length,
+        image: blog.image,
+        hasLiked:
+          blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
+      })),
+      isProfileOwner,
+    })
+  } catch {
+    res.status(500).json({ message: "Internal Server Error!" })
   }
 })

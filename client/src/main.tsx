@@ -12,9 +12,11 @@ import { OTP } from "./pages/otp.tsx"
 import { Login } from "./pages/login.tsx"
 import { Toaster } from "@/components/ui/sonner.tsx"
 import { Blogs } from "./pages/blogs.tsx"
-import { BlogPage } from "./pages/[username].[blog].tsx"
+import { BlogPage } from "./pages/[username]/[blog]/page.tsx"
 import { WritePage } from "./pages/write.tsx"
 import { PrivateRoute } from "./components/PrivateRoute.tsx"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { ProfilePage } from "./pages/[username]/page.tsx"
 
 const browserRouter = createBrowserRouter([
   {
@@ -41,16 +43,20 @@ const browserRouter = createBrowserRouter([
         element: <Blogs />,
       },
       {
-        path: "/:username/:title",
-        element: <BlogPage />,
-      },
-      {
         path: "/write",
         element: (
           <PrivateRoute>
             <WritePage />
           </PrivateRoute>
         ),
+      },
+      {
+        path: "/:username",
+        element: <ProfilePage />,
+      },
+      {
+        path: "/:username/:title",
+        element: <BlogPage />,
       },
     ],
   },
@@ -66,6 +72,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </AuthContextProvider>
       </ThemeProvider>
     </QueryClientProvider>
+    <ReactQueryDevtools client={queryClient} />
     <Toaster />
   </React.StrictMode>
 )

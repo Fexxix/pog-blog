@@ -25,7 +25,7 @@ export function HeaderAvatar() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex items-center gap-2">
-          <Link className="contents" to={`/@${user?.username}`}>
+          <Link className="contents" to={`/${user?.username}`}>
             <UserProfileCircle />
             Profile
           </Link>
