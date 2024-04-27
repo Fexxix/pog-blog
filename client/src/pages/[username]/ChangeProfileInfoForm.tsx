@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { useState } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 type ProfileMutationArgs = {
@@ -28,6 +28,7 @@ type ProfileMutationArgs = {
 function useProfileMutation() {
   const queryClient = useQueryClient()
   const { pathname } = useLocation()
+  const navigate = useNavigate()
 
   return useMutation<any, AxiosError | Error, ProfileMutationArgs>({
     mutationKey: ["profile", pathname],
@@ -39,7 +40,10 @@ function useProfileMutation() {
     onMutate: () => {
       toast.loading("Updating profile...")
     },
-    onSuccess: () => {
+    onSuccess: (_, { username }) => {
+      if (pathname.slice(1) !== username)
+        navigate(`/${username}`, { replace: true })
+
       queryClient.invalidateQueries({ queryKey: ["profile", pathname] })
       toast.dismiss()
       toast.success("Profile updated!")
