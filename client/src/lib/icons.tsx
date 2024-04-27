@@ -20,6 +20,7 @@ export { RiImageAddFill as ImageAdd } from "react-icons/ri"
 export { MdLinkOff as LinkOff } from "react-icons/md"
 export { FaStrikethrough as Strikethrough } from "react-icons/fa"
 export { SlOptions as OptionsIcon } from "react-icons/sl"
+export { LiaUserEditSolid as EditIcon } from "react-icons/lia"
 
 export function Heart({
   filled,

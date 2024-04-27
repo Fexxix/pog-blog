@@ -17,6 +17,8 @@ import {
   likesAndCommentsCountFormatter,
 } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+import { lazy, Suspense } from "react"
+import { NotFound } from "@/components/NotFound"
 
 type UserProfile = {
   username: string
@@ -35,6 +37,8 @@ type UserProfile = {
   isProfileOwner: boolean
 }
 
+const ChangeProfileInfoForm = lazy(() => import("./ChangeProfileInfoForm"))
+
 function useProfileQuery() {
   const { pathname } = useLocation()
 
@@ -45,11 +49,19 @@ function useProfileQuery() {
     },
     staleTime: Infinity,
     refetchOnWindowFocus: false,
+    retry: 1,
   })
 }
 
 export function ProfilePage() {
   const profileQuery = useProfileQuery()
+
+  if (
+    profileQuery.isError &&
+    profileQuery.error instanceof AxiosError &&
+    profileQuery.error.response?.status === 404
+  )
+    return <NotFound />
 
   if (!profileQuery.data || profileQuery.isLoading)
     return <ProfilePageSkeleton />
@@ -62,6 +74,8 @@ export function ProfilePage() {
           username={profileQuery.data.username}
           biography={profileQuery.data.biography}
           blogsCount={profileQuery.data.blogs.length}
+          isProfileOwner={profileQuery.data.isProfileOwner}
+          id={profileQuery.data.id}
         />
         <div className="flex flex-col justify-center items-center gap-5 pt-[calc(144px+384px-6rem)] pb-10">
           {profileQuery.data.blogs.map((blog) => (
@@ -87,27 +101,44 @@ function ProfileCard({
   username,
   biography,
   blogsCount,
+  isProfileOwner,
+  id,
 }: {
   profilePicture: string
   username: string
   biography: string
   blogsCount: number
+  isProfileOwner: boolean
+  id: string
 }) {
   return (
     <div className="absolute w-full sm:w-4/5 left-1/2 -translate-x-1/2 h-96 bg-white border border-zinc-200 dark:bg-zinc-950 dark:border-zinc-800 rounded-md shadow-md">
-      <Avatar className="size-40 absolute -top-40 left-1/2 translate-y-1/2 -translate-x-1/2 border-8 border-white dark:border-black">
-        <AvatarImage src={profilePicture} />
-        <AvatarFallback>{username}</AvatarFallback>
-      </Avatar>
-      <div className="h-full pt-20">
-        <h1 className="pt-8 text-3xl font-bold text-center">{username}</h1>
-        <p className="pt-4 text-center text-sm sm:text-base">{biography}</p>
-        <div className="pt-4 flex flex-col gap-3 items-center justify-center">
-          <Pencil className="size-16 sm:size-16" />
-          <span className="text-xl font-semibold">
-            {blogsCount} Blog{blogsCount === 1 ? "" : "s"} authored
-          </span>
-        </div>
+      {!isProfileOwner ? (
+        <>
+          <Avatar className="size-40 absolute -top-40 left-1/2 translate-y-1/2 -translate-x-1/2 border-8 border-white dark:border-black">
+            <AvatarImage src={profilePicture} />
+            <AvatarFallback>{username}</AvatarFallback>
+          </Avatar>
+          <div className="pt-20">
+            <h1 className="pt-8 text-3xl font-bold text-center">{username}</h1>
+            <p className="pt-4 text-center text-sm sm:text-base">{biography}</p>
+          </div>
+        </>
+      ) : (
+        <Suspense>
+          <ChangeProfileInfoForm
+            initialProfilePicture={profilePicture}
+            initialUsername={username}
+            initialBiography={biography}
+            id={id}
+          />
+        </Suspense>
+      )}
+      <div className="pt-4 flex flex-col gap-3 items-center justify-center">
+        <Pencil className="size-16 sm:size-16" />
+        <span className="text-xl font-semibold">
+          {blogsCount} Blog{blogsCount === 1 ? "" : "s"} authored
+        </span>
       </div>
     </div>
   )

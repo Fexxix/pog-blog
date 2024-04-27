@@ -190,7 +190,7 @@ userRouter.get("/:username", async (req, res) => {
     const user = await UserModel.findOne({ username })
 
     if (!user) {
-      return res.status(400).json({ message: "User does not exist!" })
+      return res.status(404).json({ message: "User does not exist!" })
     }
 
     const isProfileOwner = res.locals.session?.userId === user._id
@@ -216,7 +216,40 @@ userRouter.get("/:username", async (req, res) => {
       })),
       isProfileOwner,
     })
-  } catch {
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Internal Server Error!" })
+  }
+})
+
+userRouter.patch("/edit/:id", isAuthenticated, async (req, res) => {
+  const { id } = req.params
+  const { username, profilePicture, biography } = req.body
+
+  if (!username || !profilePicture || !biography) {
+    return res.status(400).json({ message: "All fields are required!" })
+  }
+
+  try {
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id: id },
+      {
+        username,
+        profilePicture,
+        biography,
+      },
+      {
+        new: true,
+      }
+    )
+
+    if (!updatedUser) {
+      return res.status(400).json({ message: "User does not exist!" })
+    }
+
+    res.status(200).end()
+  } catch (err) {
+    console.error("Error while updating user: ", err)
     res.status(500).json({ message: "Internal Server Error!" })
   }
 })
