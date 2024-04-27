@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom"
-import { Button } from "./ui/button"
+import { Button } from "../../ui/button"
 import { ThemeChanger } from "./ThemeChanger"
 import { useAuthContext } from "@/contexts/AuthContextProvider"
 import { HeaderAvatar } from "./HeaderAvatar"

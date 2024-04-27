@@ -1,6 +1,6 @@
 import { useEffect, type PropsWithChildren } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { useAuthContext } from "../contexts/AuthContextProvider"
+import { useAuthContext } from "../../contexts/AuthContextProvider"
 import { toast } from "sonner"
 
 export function PrivateRoute({ children }: PropsWithChildren) {
