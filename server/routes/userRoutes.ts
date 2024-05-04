@@ -129,7 +129,7 @@ userRouter.post("/login", async (req, res) => {
   }
 })
 
-userRouter.get("/logout", isAuthenticated, async (_, res) => {
+userRouter.post("/logout", isAuthenticated, async (_, res) => {
   try {
     await lucia.invalidateSession(res.locals.session!.id)
     return res
