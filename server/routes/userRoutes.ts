@@ -129,6 +129,18 @@ userRouter.post("/login", async (req, res) => {
   }
 })
 
+userRouter.get("/logout", isAuthenticated, async (_, res) => {
+  try {
+    await lucia.invalidateSession(res.locals.session!.id)
+    return res
+      .setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize())
+      .status(200)
+      .json({ message: "Logout successful!" })
+  } catch {
+    return res.status(500).json({ message: "Something went wrong!" })
+  }
+})
+
 userRouter.get("/me", isAuthenticated, async (_, res) => {
   if (res.locals.session) {
     try {
