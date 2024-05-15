@@ -21,6 +21,8 @@ export { MdLinkOff as LinkOff } from "react-icons/md"
 export { FaStrikethrough as Strikethrough } from "react-icons/fa"
 export { SlOptions as OptionsIcon } from "react-icons/sl"
 export { LiaUserEditSolid as EditIcon } from "react-icons/lia"
+export { CiCirclePlus as Plus } from "react-icons/ci"
+export { CiCircleMinus as Minus } from "react-icons/ci"
 
 export function Heart({
   filled,
