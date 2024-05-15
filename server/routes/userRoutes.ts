@@ -207,15 +207,51 @@ userRouter.get("/:username", async (req, res) => {
 
     const isProfileOwner = res.locals.session?.userId === user._id
 
-    const userBlogs = await BlogModel.find({ author: user._id })
-      .sort({ datePublished: -1 })
-      .limit(20)
+    const blogsCount = await BlogModel.countDocuments({ author: user._id })
 
     res.status(200).json({
       username: user.username,
       profilePicture: user.profilePicture,
       biography: user.biography,
       id: user._id,
+      followers: user.followers.length,
+      following: user.following.length,
+      isFollowing: user.followers.includes(res.locals.session?.userId ?? ""),
+      isProfileOwner,
+      blogsCount,
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Internal Server Error!" })
+  }
+})
+
+userRouter.get("/:user_id/blogs", async (req, res) => {
+  const { user_id } = req.params
+  const pageSize = 20
+
+  const page = parseInt(req.query.page as string)
+
+  if (isNaN(page) || page < 1) {
+    return res.status(400).json({ message: "Invalid page number" })
+  }
+
+  const skip = (page - 1) * pageSize
+
+  try {
+    const userBlogs = await BlogModel.find({ author: user_id })
+      .sort({ datePublished: -1 })
+      .skip(skip)
+      .limit(pageSize)
+
+    if (!userBlogs) {
+      return res.status(404).json({ message: "User does not exist!" })
+    }
+
+    const count = await BlogModel.countDocuments({ author: user_id })
+    const hasMore = page * pageSize < count
+
+    res.status(200).json({
       blogs: userBlogs.map((blog) => ({
         id: blog._id,
         title: blog.title,
@@ -226,7 +262,8 @@ userRouter.get("/:username", async (req, res) => {
         hasLiked:
           blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
       })),
-      isProfileOwner,
+      hasMore,
+      nextPage: hasMore ? page + 1 : null,
     })
   } catch (err) {
     console.error(err)
@@ -263,5 +300,71 @@ userRouter.patch("/edit/:id", isAuthenticated, async (req, res) => {
   } catch (err) {
     console.error("Error while updating user: ", err)
     res.status(500).json({ message: "Internal Server Error!" })
+  }
+})
+
+userRouter.post("/follow/:id", isAuthenticated, async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const userToFollow = await UserModel.findById(id)
+    const currentUser = await UserModel.findById(res.locals.session?.userId)
+
+    if (!currentUser) {
+      return res.status(400).json({ message: "User does not exist" })
+    }
+
+    if (!userToFollow) {
+      return res.status(400).json({ message: "User does not exist" })
+    }
+
+    if (userToFollow.followers.includes(res.locals.session?.userId as string)) {
+      res.status(400).json({ message: "Already following" })
+    }
+
+    userToFollow.followers.push(res.locals.session?.userId ?? "")
+    currentUser.following.push(id)
+
+    await Promise.all([userToFollow.save(), currentUser.save()])
+
+    res.status(200).end()
+  } catch {
+    res.status(500).json({ message: "Something went wrong!" })
+  }
+})
+
+userRouter.delete("/unfollow/:id", isAuthenticated, async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const userToUnfollow = await UserModel.findById(id)
+    const currentUser = await UserModel.findById(res.locals.session?.userId)
+
+    if (!currentUser) {
+      return res.status(400).json({ message: "User does not exist" })
+    }
+
+    if (!userToUnfollow) {
+      return res.status(400).json({ message: "User does not exist" })
+    }
+
+    if (
+      !userToUnfollow.followers.includes(res.locals.session?.userId as string)
+    ) {
+      res.status(400).json({ message: "Not following" })
+    }
+
+    userToUnfollow.followers = userToUnfollow.followers.filter(
+      (follower) => follower !== res.locals.session?.userId
+    )
+    currentUser.following = currentUser.following.filter(
+      (following) => following !== id
+    )
+
+    await Promise.all([userToUnfollow.save(), currentUser.save()])
+
+    res.status(200).end()
+  } catch {
+    res.status(500).json({ message: "Something went wrong!" })
   }
 })
