@@ -10,8 +10,27 @@ import { sendVerificationEmail } from "../controllers/sendEmail.js"
 import { BlogModel } from "../models/BlogModel.js"
 
 export const userRouter = Router()
-const MIN_PASSWORD_LENGTH = 6
 const argon2id = new Argon2id()
+
+const MIN_USERNAME_LENGTH = 3
+const MIN_PASSWORD_LENGTH = 6
+const disallowedNames = ["blogs", "login", "signup", "otp", "feed"]
+const disallowedCharactersInURL = [
+  " ",
+  "<",
+  ">",
+  "#",
+  "%",
+  "{",
+  "}",
+  "|",
+  "\\",
+  "^",
+  "~",
+  "[",
+  "]",
+  "`",
+] as const
 
 userRouter.post("/signup", async (req, res) => {
   const { email = "", password = "", username = "" } = req.body
@@ -27,6 +46,16 @@ userRouter.post("/signup", async (req, res) => {
 
   if (exists) {
     return res.status(400).json({ message: "Email already exists." })
+  }
+
+  if (
+    !username ||
+    typeof username !== "string" ||
+    username.length < MIN_USERNAME_LENGTH ||
+    disallowedNames.includes(username.toLowerCase()) ||
+    disallowedCharactersInURL.some((char) => username.includes(char))
+  ) {
+    return res.status(400).json({ message: "Invalid username" })
   }
 
   if (!email || typeof email !== "string" || !isValidEmail(email)) {

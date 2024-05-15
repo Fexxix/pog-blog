@@ -16,6 +16,9 @@ import { LoadingSpinner } from "@/components/ui/loadingspinner"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useThemeContext } from "@/contexts/ThemeProvider"
+import { disallowedCharactersInURL } from "@/lib/utils"
+
+const disallowedNames = ["blogs", "login", "signup", "otp", "feed"]
 
 export type SignupFormData = {
   username: string
@@ -60,6 +63,21 @@ export function Signup() {
                   },
                   required: "This field is required!",
                   disabled: signupMutation.isPending,
+                  validate: (value) => {
+                    if (disallowedNames.includes(value)) {
+                      return "Username is not allowed"
+                    }
+
+                    if (
+                      disallowedCharactersInURL.some((char) =>
+                        value.includes(char)
+                      )
+                    ) {
+                      return "URL contains disallowed characters"
+                    }
+
+                    return true
+                  },
                 })}
                 id="username"
                 placeholder="toxel32"

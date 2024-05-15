@@ -15,3 +15,20 @@ export const likesAndCommentsCountFormatter = new Intl.NumberFormat("en", {
   notation: "compact",
   compactDisplay: "short",
 })
+
+export const disallowedCharactersInURL = [
+  " ",
+  "<",
+  ">",
+  "#",
+  "%",
+  "{",
+  "}",
+  "|",
+  "\\",
+  "^",
+  "~",
+  "[",
+  "]",
+  "`",
+] as const
