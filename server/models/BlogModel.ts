@@ -1,5 +1,45 @@
 import { Schema, model } from "mongoose"
 
+export const CATEGORIES = [
+  "Technology",
+  "Science",
+  "Travel",
+  "Food & Cooking",
+  "Health & Fitness",
+  "Fashion & Style",
+  "Anime News",
+  "Manga",
+  "Anime Reviews",
+  "Cosplay",
+  "Anime Recommendations",
+  "Anime Memes",
+  "Fan Art",
+  "Anime Music",
+  "Anime Conventions",
+  "Coding Challenges",
+  "Web Development",
+  "Mobile App Development",
+  "Software Engineering",
+  "Programming Languages",
+  "Algorithms & Data Structures",
+  "Developer Tools & Libraries",
+  "Tech News",
+  "Arts & Crafts",
+  "Business & Finance",
+  "Sports",
+  "Music",
+  "Movies & TV Shows",
+  "Books & Literature",
+  "Gaming",
+  "Home & Garden",
+  "Photography",
+  "Pets & Animals",
+  "DIY & How-To Guides",
+  "Education & Learning",
+  "Parenting",
+  "Environment & Sustainability",
+]
+
 export const BlogModel = model(
   "blogs",
   new Schema({
@@ -26,6 +66,11 @@ export const BlogModel = model(
       type: Date,
       required: true,
       default: () => new Date(),
+    },
+    categories: {
+      type: [String],
+      enum: CATEGORIES,
+      required: true,
     },
     comments: [
       {
