@@ -40,24 +40,22 @@ type InfiniteBlogList = {
 }
 
 export function Blogs() {
-  const { data, error, fetchNextPage, hasNextPage } = useInfiniteQuery<
-    InfiniteBlogList,
-    AxiosError
-  >({
-    queryKey: ["blogs"],
-    queryFn: async ({ pageParam }) =>
-      (
-        await axios.get(`/api/blogs?page=${pageParam}`, {
-          withCredentials: true,
-        })
-      ).data,
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
-  })
+  const { data, error, fetchNextPage, hasNextPage, isLoading } =
+    useInfiniteQuery<InfiniteBlogList, AxiosError>({
+      queryKey: ["blogs"],
+      queryFn: async ({ pageParam }) =>
+        (
+          await axios.get(`/api/blogs?page=${pageParam}`, {
+            withCredentials: true,
+          })
+        ).data,
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+    })
 
-  if (!data) {
+  if (!data || isLoading) {
     return <InfiniteBlogsSkeleton isInitialLoad />
   }
 
