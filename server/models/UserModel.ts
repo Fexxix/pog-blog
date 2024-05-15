@@ -35,6 +35,20 @@ export const UserModel = model(
         required: true,
         default: false,
       },
+      followers: [
+        {
+          type: String,
+          ref: "users",
+          default: [],
+        },
+      ],
+      following: [
+        {
+          type: String,
+          ref: "users",
+          default: [],
+        },
+      ],
     } as const,
     { _id: false }
   )
