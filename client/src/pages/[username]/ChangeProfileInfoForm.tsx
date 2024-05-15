@@ -130,7 +130,7 @@ export default function ChangeProfileInfoForm({
         />
         <AvatarFallback>{initialUsername}</AvatarFallback>
       </Avatar>
-      <div className="pt-20">
+      <div className="flex flex-col items-center">
         <h1
           contentEditable={edit}
           suppressContentEditableWarning
