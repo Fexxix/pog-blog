@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose"
+import { CATEGORIES } from "./BlogModel.js"
 
 export const UserModel = model(
   "users",
@@ -29,6 +30,11 @@ export const UserModel = model(
         required: false,
         type: String,
         default: "This user has no biography",
+      },
+      categories: {
+        type: [String],
+        enums: CATEGORIES,
+        required: true,
       },
       verified: {
         type: Boolean,
