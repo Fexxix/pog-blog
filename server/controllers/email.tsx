@@ -22,7 +22,7 @@ export const VerifyIdentityEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Img
-          src={`https://ibb.co/Phh6HN9`}
+          src={`https://i.ibb.co/7WW1mXR/Screenshot-from-2024-03-31-13-14-28.png`}
           width="212"
           height="88"
           alt="Pog Blog"
