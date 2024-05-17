@@ -9,3 +9,4 @@
 - make /:username route responsive
 - UI for error
 - show blog categories
+- localize dates
