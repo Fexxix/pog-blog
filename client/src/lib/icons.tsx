@@ -23,6 +23,7 @@ export { SlOptions as OptionsIcon } from "react-icons/sl"
 export { LiaUserEditSolid as EditIcon } from "react-icons/lia"
 export { CiCirclePlus as Plus } from "react-icons/ci"
 export { CiCircleMinus as Minus } from "react-icons/ci"
+export { TiTick as Tick } from "react-icons/ti"
 
 export function Heart({
   filled,
