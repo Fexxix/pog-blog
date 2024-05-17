@@ -12,6 +12,7 @@ export type User = {
   profilePicture: string
   username: string
   biography: string
+  hasNoCategories?: boolean
 }
 
 type AuthContextType = {

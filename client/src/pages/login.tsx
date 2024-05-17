@@ -155,9 +155,15 @@ function useLogin() {
     },
     onSuccess: ({ user }) => {
       setUser(user)
-      navigate("/blogs", { replace: true })
+
+      if (user.hasNoCategories) {
+        navigate("/choose-categories", { replace: true })
+      } else {
+        navigate("/blogs", { replace: true })
+        toast.success("Logged in!")
+      }
+
       setHasSession(true)
-      toast.success("Logged in!")
     },
   })
 }

@@ -17,6 +17,7 @@ import { WritePage } from "./pages/write.tsx"
 import { PrivateRoute } from "./components/common/PrivateRoute.tsx"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { ProfilePage } from "./pages/[username]/page.tsx"
+import { ChooseCategories } from "./pages/choose-categories.tsx"
 
 const browserRouter = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const browserRouter = createBrowserRouter([
       {
         path: "/otp",
         element: <OTP />,
+      },
+      {
+        path: "/choose-categories",
+        element: <ChooseCategories />,
       },
       {
         path: "/login",

@@ -14,7 +14,15 @@ const argon2id = new Argon2id()
 
 const MIN_USERNAME_LENGTH = 3
 const MIN_PASSWORD_LENGTH = 6
-const disallowedNames = ["blogs", "login", "signup", "otp", "feed"]
+const MIN_CATEGORIES_LENGTH = 3
+const disallowedNames = [
+  "blogs",
+  "login",
+  "signup",
+  "otp",
+  "feed",
+  "choose-categories",
+]
 const disallowedCharactersInURL = [
   " ",
   "<",
@@ -150,6 +158,7 @@ userRouter.post("/login", async (req, res) => {
           profilePicture: user.profilePicture,
           biography: user.biography,
           id: user._id,
+          ...(user.categories.length === 0 ? { hasNoCategories: true } : {}),
         },
       })
   } catch (err) {
@@ -181,6 +190,7 @@ userRouter.get("/me", isAuthenticated, async (_, res) => {
         profilePicture: user?.profilePicture,
         biography: user?.biography,
         id: user?._id,
+        ...(user?.categories.length === 0 ? { hasNoCategories: true } : {}),
       })
     } catch (err) {
       console.error("Error while logging in: ", err)
@@ -205,15 +215,14 @@ userRouter.post("/verify-email", async (req, res) => {
         .json({ message: "Invalid or expired validation code." })
     }
 
-    try {
-      const user = await UserModel.findOne({ email })
-      if (user) {
-        user.verified = true
-        await user.save()
-      }
-    } catch {
-      res.status(400).json({ message: "User does not exist." })
+    const user = await UserModel.findOne({ email })
+
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist." })
     }
+
+    user.verified = true
+    await user.save()
 
     await ValidationCodeModel.deleteOne({ email, code: validationCode })
 
@@ -221,6 +230,47 @@ userRouter.post("/verify-email", async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: "Internal server error." })
+  }
+})
+
+userRouter.patch("/categories", isAuthenticated, async (req, res) => {
+  const { categories, email } = req.body
+
+  if (!categories || !email) {
+    return res.status(400).json({ message: "Invalid request body!" })
+  }
+
+  try {
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: "Invalid email!" })
+    }
+
+    const user = await UserModel.findOne({ email })
+
+    if (!user) {
+      return res.status(404).json({ message: "User does not exist!" })
+    }
+
+    if (res.locals.session!.userId !== user._id) {
+      return res
+        .status(400)
+        .json({ message: "Email does not belong to the current user!" })
+    }
+
+    if (categories.length < MIN_CATEGORIES_LENGTH) {
+      return res.status(400).json({ message: "Invalid number of categories!" })
+    }
+
+    if (user.categories.length !== 0) {
+      return res.status(400).json({ message: "User already has categories!" })
+    }
+
+    user.categories = categories
+    await user.save()
+
+    res.status(200).end()
+  } catch {
+    res.status(500).json({ message: "Something went wrong!" })
   }
 })
 
@@ -248,6 +298,7 @@ userRouter.get("/:username", async (req, res) => {
       isFollowing: user.followers.includes(res.locals.session?.userId ?? ""),
       isProfileOwner,
       blogsCount,
+      categories: user.categories,
     })
   } catch (err) {
     console.error(err)
