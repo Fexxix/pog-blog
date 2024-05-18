@@ -42,7 +42,7 @@ type InfiniteBlogList = {
 }
 
 export function ExplorePage() {
-  const { data, error, fetchNextPage, hasNextPage, isLoading } =
+  const { data, error, fetchNextPage, hasNextPage, isLoading, isError } =
     useInfiniteQuery<InfiniteBlogList, AxiosError>({
       queryKey: ["blogs"],
       queryFn: async ({ pageParam }) =>
@@ -57,25 +57,26 @@ export function ExplorePage() {
       staleTime: Infinity,
     })
 
-  if (!data || isLoading) {
+  if (isLoading && !isError) {
     return <InfiniteBlogsSkeleton isInitialLoad />
   }
 
   return (
     <>
       <InfiniteScroll
-        dataLength={data.pages.length}
+        dataLength={(data && data.pages.length) ?? 0}
         hasMore={hasNextPage}
         next={fetchNextPage}
         loader={!error && <InfiniteBlogsSkeleton />}
         className="flex flex-col items-center"
         children={
           <div className="flex flex-col justify-center gap-5 max-w-full w-4/5 pt-20 size-full">
-            {data.pages.map((page) =>
-              page.blogs.map((blog) => (
-                <BlogCard blogData={blog} key={blog.id} />
-              ))
-            )}
+            {data &&
+              data.pages.map((page) =>
+                page.blogs.map((blog) => (
+                  <BlogCard blogData={blog} key={blog.id} />
+                ))
+              )}
           </div>
         }
       />
