@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import { Heart } from "@/lib/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
+  CATEGORIES,
   cn,
   likesAndCommentsCountFormatter,
   publicDateFormatter,
@@ -31,6 +32,7 @@ type Blog = {
   }
   datePublished: string
   hasLiked: boolean
+  categories: (typeof CATEGORIES)[number][]
 }
 
 type InfiniteBlogList = {
@@ -39,7 +41,7 @@ type InfiniteBlogList = {
   nextPage: number
 }
 
-export function Blogs() {
+export function ExplorePage() {
   const { data, error, fetchNextPage, hasNextPage, isLoading } =
     useInfiniteQuery<InfiniteBlogList, AxiosError>({
       queryKey: ["blogs"],
@@ -139,15 +141,27 @@ export function BlogCard({ blogData }: { blogData: Blog }) {
             alt={`thumbnail for ${blogData.title}`}
           />
         </CardContent>
-        <CardFooter className="gap-2">
-          <Heart
-            filled={blogData.hasLiked}
-            className={cn({ "text-red-500": blogData.hasLiked })}
-          />
-          <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
-          <span className="text-sm sm:text-base">
-            {likesAndCommentsCountFormatter.format(blogData.likes)}
-          </span>
+        <CardFooter className="flex-col items-start gap-4 overflow-y-auto">
+          <div className="flex items-center gap-2 w-full overflow-y-auto">
+            {blogData.categories.map((category) => (
+              <span
+                key={category}
+                className="px-2 py-1 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800 rounded"
+              >
+                {category}
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <Heart
+              filled={blogData.hasLiked}
+              className={cn({ "text-red-500": blogData.hasLiked })}
+            />
+            <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
+            <span className="text-sm sm:text-base">
+              {likesAndCommentsCountFormatter.format(blogData.likes)}
+            </span>
+          </div>
         </CardFooter>
       </Card>
     </Link>

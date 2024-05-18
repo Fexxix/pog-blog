@@ -11,7 +11,7 @@ import { HeaderLayout } from "./components/layouts/header/HeaderLayout.tsx"
 import { OTP } from "./pages/otp.tsx"
 import { Login } from "./pages/login.tsx"
 import { Toaster } from "@/components/ui/sonner.tsx"
-import { Blogs } from "./pages/blogs.tsx"
+import { ExplorePage } from "./pages/explore.tsx"
 import { BlogPage } from "./pages/[username]/[blog]/page.tsx"
 import { WritePage } from "./pages/write.tsx"
 import { PrivateRoute } from "./components/common/PrivateRoute.tsx"
@@ -44,8 +44,8 @@ const browserRouter = createBrowserRouter([
         element: <Login />,
       },
       {
-        path: "/blogs",
-        element: <Blogs />,
+        path: "/explore",
+        element: <ExplorePage />,
       },
       {
         path: "/write",
