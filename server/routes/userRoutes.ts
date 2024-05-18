@@ -341,6 +341,7 @@ userRouter.get("/:user_id/blogs", async (req, res) => {
         image: blog.image,
         hasLiked:
           blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
+        categories: blog.categories,
       })),
       hasMore,
       nextPage: hasMore ? page + 1 : null,

@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
+  CATEGORIES,
   cn,
   likesAndCommentsCountFormatter,
   publicDateFormatter,
@@ -50,6 +51,7 @@ type Blog = {
   }
   image: string
   hasLiked: boolean
+  categories: (typeof CATEGORIES)[number][]
 }
 
 type LikedByUsers = {
@@ -117,6 +119,16 @@ export function BlogPage() {
       <h2 className="text-zinc-400 text-lg md:text-xl pt-4">
         {blogQuery.data.description}
       </h2>
+      <div className="flex items-center gap-2 w-full overflow-y-auto pt-4">
+        {blogQuery.data.categories.map((category) => (
+          <span
+            key={category}
+            className="px-2 py-1 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800 rounded"
+          >
+            {category}
+          </span>
+        ))}
+      </div>
       <div className="flex items-center gap-3 mt-4 py-2">
         <Avatar>
           <Link className="contents" to={`/${blogQuery.data.author.username}`}>
@@ -157,7 +169,7 @@ export function BlogPage() {
       </div>
       <div
         dangerouslySetInnerHTML={{ __html: blogQuery.data.content }}
-        className="prose prose-neutral prose-pre:bg-zinc-100 prose-pre:text-black dark:prose-pre:text-current dark:prose-pre:bg-zinc-800 dark:prose-invert mt-8"
+        className="prose prose-neutral prose-pre:bg-zinc-100 prose-pre:text-black dark:prose-pre:text-current dark:prose-pre:bg-zinc-800 dark:prose-invert sm:prose-sm md:prose-base lg:prose-lg mt-8"
       />
     </div>
   )

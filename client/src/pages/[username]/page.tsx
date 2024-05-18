@@ -15,6 +15,7 @@ import {
   publicDateFormatter,
   cn,
   likesAndCommentsCountFormatter,
+  CATEGORIES,
 } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { lazy, Suspense, useState } from "react"
@@ -33,6 +34,7 @@ type UserProfile = {
   isProfileOwner: boolean
   isFollowing: boolean
   blogsCount: number
+  categories: (typeof CATEGORIES)[number][]
 }
 
 type Blog = {
@@ -43,6 +45,7 @@ type Blog = {
   likes: number
   datePublished: string
   hasLiked: boolean
+  categories: (typeof CATEGORIES)[number][]
 }
 
 type InfiniteBlogList = {
@@ -107,7 +110,7 @@ function Profile({
   if (!profileQuery.data || profileQuery.isLoading) return <ProfileSkeleton />
 
   return (
-    <div className="flex flex-col items-center justify-center gap-10 absolute w-full sm:w-4/5 left-1/2 -translate-x-1/2 h-96 bg-white border border-zinc-200 dark:bg-zinc-950 dark:border-zinc-800 rounded-md shadow-md">
+    <div className="flex flex-col items-center justify-center gap-10 pt-16 absolute w-full sm:w-4/5 left-1/2 -translate-x-1/2 bg-white border border-zinc-200 dark:bg-zinc-950 dark:border-zinc-800 rounded-md shadow-md">
       {!profileQuery.data.isProfileOwner ? (
         <>
           <Avatar className="size-40 absolute -top-40 left-1/2 translate-y-1/2 -translate-x-1/2 border-8 bg-zinc-200 dark:bg-zinc-800 border-white dark:border-black">
@@ -174,6 +177,16 @@ function Profile({
           <span className="text-xl font-semibold">Following</span>
         </div>
       </div>
+      <div className="flex flex-col gap-3 items-center">
+        <h3 className="font-bold text-xl">Preferred Categories</h3>
+        <div className="flex justify-center px-2 pb-2 gap-2 flex-wrap">
+          {profileQuery.data.categories.map((category) => (
+            <Button size="sm" key={category} variant="outline">
+              {category}
+            </Button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -200,14 +213,14 @@ function Blogs({
 
   if (!data || isLoading) {
     return (
-      <div className="pt-[400px]">
+      <div className="pt-[540px]">
         <InfiniteBlogsSkeleton />
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col justify-center items-center gap-5 pb-10 pt-[400px]">
+    <div className="flex flex-col justify-center items-center gap-5 pb-10 pt-[540px] [&>.infinite-scroll-component\_\_outerdiv]:w-full">
       <InfiniteScroll
         dataLength={data.pages.length}
         hasMore={hasNextPage}
@@ -272,15 +285,27 @@ function BlogCard({
             alt={`thumbnail for ${blogData.title}`}
           />
         </CardContent>
-        <CardFooter className="gap-2">
-          <Heart
-            filled={blogData.hasLiked}
-            className={cn({ "text-red-500": blogData.hasLiked })}
-          />
-          <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
-          <span className="text-sm sm:text-base">
-            {likesAndCommentsCountFormatter.format(blogData.likes)}
-          </span>
+        <CardFooter className="flex-col items-start gap-4 overflow-y-auto">
+          <div className="flex items-center gap-2 w-full overflow-y-auto">
+            {blogData.categories.map((category) => (
+              <span
+                key={category}
+                className="px-2 py-1 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800 rounded"
+              >
+                {category}
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <Heart
+              filled={blogData.hasLiked}
+              className={cn({ "text-red-500": blogData.hasLiked })}
+            />
+            <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
+            <span className="text-sm sm:text-base">
+              {likesAndCommentsCountFormatter.format(blogData.likes)}
+            </span>
+          </div>
         </CardFooter>
       </Card>
     </Link>
