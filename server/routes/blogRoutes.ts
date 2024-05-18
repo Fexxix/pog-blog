@@ -1,5 +1,5 @@
 import { Router, type Request } from "express"
-import { BlogModel } from "../models/BlogModel.js"
+import { BlogModel, CATEGORIES } from "../models/BlogModel.js"
 import { isAuthenticated } from "../middleware/is-authenticated.js"
 import { CommentModel } from "../models/CommentsModel.js"
 import { UserModel } from "../models/UserModel.js"
@@ -28,7 +28,9 @@ blogsRouter.get("/", async (req, res) => {
       .sort({ datePublished: -1 })
       .skip(skip)
       .limit(PAGE_SIZE)
-      .select("title description datePublished likes _id author image")
+      .select(
+        "title description datePublished likes _id author image categories"
+      )
       .populate({ path: "author", select: "username profilePicture" })
       .exec()
 
@@ -51,11 +53,87 @@ blogsRouter.get("/", async (req, res) => {
         image: blog.image,
         hasLiked:
           blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
+        categories: blog.categories,
       })),
       hasMore,
       nextPage: hasMore ? page + 1 : null,
     })
   } catch {
+    res.status(500).json({ message: "Something went wrong!" })
+  }
+})
+
+blogsRouter.get("/feed", isAuthenticated, async (req, res) => {
+  const page = parseInt(req.query.page as string)
+  const feedType = req.query.feedType as string
+
+  // Validate feedType
+  if (!feedType || (feedType !== "for_you" && feedType !== "following")) {
+    return res.status(400).json({ message: "Invalid feed type" })
+  }
+
+  // Validate page number
+  if (isNaN(page) || page < 1) {
+    return res.status(400).json({ message: "Invalid page number" })
+  }
+
+  try {
+    const user = await UserModel.findById(
+      res.locals.session?.userId ?? ""
+    ).populate("following")
+
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" })
+    }
+
+    const skip = (page - 1) * PAGE_SIZE
+
+    const query =
+      feedType === "for_you"
+        ? {
+            categories: { $in: user.categories },
+          }
+        : {
+            author: { $in: user.following },
+          }
+
+    const [blogs, totalBlogs] = await Promise.all([
+      BlogModel.find(query)
+        .sort({ datePublished: -1 })
+        .skip(skip)
+        .limit(PAGE_SIZE)
+        .select(
+          "title description datePublished likes _id author image categories"
+        )
+        .populate({ path: "author", select: "username profilePicture" })
+        .exec(),
+      BlogModel.countDocuments(query),
+    ])
+
+    const formattedBlogs = blogs.map((blog) => ({
+      id: blog._id.toString(),
+      title: blog.title,
+      description: blog.description || "",
+      datePublished: blog.datePublished.toISOString(),
+      likes: blog.likes.length,
+      author: {
+        // @ts-ignore
+        username: blog.author.username,
+        // @ts-ignore
+        profilePicture: blog.author.profilePicture,
+      },
+      image: blog.image || "",
+      hasLiked: blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
+      categories: blog.categories,
+    }))
+
+    const totalPages = Math.ceil(totalBlogs / PAGE_SIZE)
+    const hasMore = page < totalPages
+    const nextPage = hasMore ? page + 1 : null
+
+    res.status(200).json({ blogs: formattedBlogs, hasMore, nextPage })
+  } catch (error) {
+    console.error(error)
     res.status(500).json({ message: "Something went wrong!" })
   }
 })
@@ -237,6 +315,7 @@ blogsRouter.get("/:username/:title", async (req, res) => {
           profilePicture: blog.author.profilePicture,
         },
         image: blog.image,
+        categories: blog.categories,
         hasLiked:
           blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
       })

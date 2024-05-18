@@ -159,7 +159,7 @@ function useLogin() {
       if (user.hasNoCategories) {
         navigate("/choose-categories", { replace: true })
       } else {
-        navigate("/blogs", { replace: true })
+        navigate("/", { replace: true })
         toast.success("Logged in!")
       }
 
