@@ -71,4 +71,4 @@ export const CATEGORIES = [
   "Education & Learning",
   "Parenting",
   "Environment & Sustainability",
-]
+] as const
