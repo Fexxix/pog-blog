@@ -18,6 +18,7 @@ import { PrivateRoute } from "./components/common/PrivateRoute.tsx"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { ProfilePage } from "./pages/[username]/page.tsx"
 import { ChooseCategories } from "./pages/choose-categories.tsx"
+import { EditPage } from "./pages/edit.[blog].tsx"
 
 const browserRouter = createBrowserRouter([
   {
@@ -52,6 +53,14 @@ const browserRouter = createBrowserRouter([
         element: (
           <PrivateRoute>
             <WritePage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/edit/:title",
+        element: (
+          <PrivateRoute>
+            <EditPage />
           </PrivateRoute>
         ),
       },

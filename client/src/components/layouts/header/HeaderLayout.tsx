@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from "react-router-dom"
+import { Link, Outlet, useLocation, useParams } from "react-router-dom"
 import { Button } from "../../ui/button"
 import { ThemeChanger } from "./ThemeChanger"
 import { useAuthContext } from "@/contexts/AuthContextProvider"
@@ -9,6 +9,12 @@ import { cn } from "@/lib/utils"
 export function HeaderLayout() {
   const { pathname } = useLocation()
   const { user } = useAuthContext()
+
+  const { username = "", title = "" } = useParams() as any
+
+  const canDisplayEditLinkContainer = !!username && !!title
+
+  const isEditRoute = pathname.startsWith("/edit/")
 
   return (
     <>
@@ -42,7 +48,13 @@ export function HeaderLayout() {
               <div id="writePageOptionsContainer" className="contents" />
             </>
           )}
-          {user && pathname !== "/write" && (
+          {isEditRoute && (
+            <>
+              <div id="publishBtnContainer" className="contents" />
+              <div id="writePageOptionsContainer" className="contents" />
+            </>
+          )}
+          {user && pathname !== "/write" && !isEditRoute && (
             <Link className="contents" to="/write">
               <Button variant="ghost" className="items-center gap-2 px-2.5">
                 <Pencil className="size-5" />
@@ -51,6 +63,9 @@ export function HeaderLayout() {
                 </span>
               </Button>
             </Link>
+          )}
+          {canDisplayEditLinkContainer && (
+            <div id="editLinkContainer" className="contents" />
           )}
           <ThemeChanger />
           {user && <HeaderAvatar />}

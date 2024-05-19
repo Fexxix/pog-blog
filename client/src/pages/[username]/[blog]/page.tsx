@@ -13,7 +13,7 @@ import {
 } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { Link, useParams } from "react-router-dom"
-import { CommentBubble, Heart } from "@/lib/icons"
+import { CommentBubble, Edit, Heart } from "@/lib/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -36,6 +36,7 @@ import { useAuthContext } from "@/contexts/AuthContextProvider"
 import { Separator } from "@/components/ui/separator"
 import { useForm } from "react-hook-form"
 import { Textarea } from "@/components/ui/textarea"
+import { createPortal } from "react-dom"
 
 type Blog = {
   id: string
@@ -52,6 +53,7 @@ type Blog = {
   image: string
   hasLiked: boolean
   categories: (typeof CATEGORIES)[number][]
+  isAuthor: boolean
 }
 
 type LikedByUsers = {
@@ -118,65 +120,87 @@ export function BlogPage() {
     return <PageSkeleton />
   }
 
+  const editLinkContainer = document.getElementById("editLinkContainer")
+
   return (
-    <div className="pt-24 w-11/12 sm:w-3/4 lg:w-1/2 mx-auto">
-      <h1 className="text-5xl font-bold">{blogQuery.data.title}</h1>
-      <h2 className="text-zinc-400 text-lg md:text-xl pt-4">
-        {blogQuery.data.description}
-      </h2>
-      <div className="flex items-center gap-2 w-full overflow-y-auto pt-4">
-        {blogQuery.data.categories.map((category) => (
-          <span
-            key={category}
-            className="px-2 py-1 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800 rounded"
+    <>
+      {blogQuery.data.isAuthor &&
+        editLinkContainer &&
+        createPortal(
+          <Link
+            className="contents"
+            to={`/edit/${encodeURIComponent(title)}`}
+            state={{ blog: blogQuery.data }}
           >
-            {category}
-          </span>
-        ))}
-      </div>
-      <div className="flex items-center gap-3 mt-4 py-2">
-        <Avatar>
+            <Button variant="ghost" className="items-center gap-2 px-2.5">
+              <Edit className="size-5" />
+              <span className="sr-only sm:not-sr-only font-semibold">Edit</span>
+            </Button>
+          </Link>,
+          editLinkContainer
+        )}
+      <div className="pt-24 w-11/12 sm:w-3/4 lg:w-1/2 mx-auto">
+        <h1 className="text-5xl font-bold">{blogQuery.data.title}</h1>
+        <h2 className="text-zinc-400 text-lg md:text-xl pt-4">
+          {blogQuery.data.description}
+        </h2>
+        <div className="flex items-center gap-2 w-full overflow-y-auto pt-4">
+          {blogQuery.data.categories.map((category) => (
+            <span
+              key={category}
+              className="px-2 py-1 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800 rounded"
+            >
+              {category}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 mt-4 py-2">
+          <Avatar>
+            <Link
+              className="contents"
+              to={`/${blogQuery.data.author.username}`}
+            >
+              <AvatarImage
+                className="bg-zinc-200 dark:bg-zinc-800"
+                src={blogQuery.data.author.profilePicture}
+              />
+              <AvatarFallback>{blogQuery.data.author.username}</AvatarFallback>
+            </Link>
+          </Avatar>
           <Link className="contents" to={`/${blogQuery.data.author.username}`}>
-            <AvatarImage
-              className="bg-zinc-200 dark:bg-zinc-800"
-              src={blogQuery.data.author.profilePicture}
-            />
-            <AvatarFallback>{blogQuery.data.author.username}</AvatarFallback>
+            <span>{blogQuery.data.author.username}</span>
           </Link>
-        </Avatar>
-        <Link className="contents" to={`/${blogQuery.data.author.username}`}>
-          <span>{blogQuery.data.author.username}</span>
-        </Link>
-        <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
-        <span className="text-xs sm:text-sm">
-          {publicDateFormatter.format(new Date(blogQuery.data.datePublished))}
-        </span>
-      </div>
-      <div className="flex items-center gap-3 px-2 mt-2 border-y border-y-zinc-200 dark:border-y-zinc-800">
-        <div className="flex items-center gap-2">
-          <Likes
-            likes={blogQuery.data.likes}
+          <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
+          <span className="text-xs sm:text-sm">
+            {publicDateFormatter.format(new Date(blogQuery.data.datePublished))}
+          </span>
+        </div>
+        <div className="flex items-center gap-3 px-2 mt-2 border-y border-y-zinc-200 dark:border-y-zinc-800">
+          <div className="flex items-center gap-2">
+            <Likes
+              likes={blogQuery.data.likes}
+              blogId={blogQuery.data.id}
+              alreadyLiked={blogQuery.data.hasLiked}
+            />
+          </div>
+          <CommentsButton
+            numberOfComments={blogQuery.data.comments}
             blogId={blogQuery.data.id}
-            alreadyLiked={blogQuery.data.hasLiked}
           />
         </div>
-        <CommentsButton
-          numberOfComments={blogQuery.data.comments}
-          blogId={blogQuery.data.id}
+        <div className="flex justify-center items-center mt-8">
+          <img
+            src={blogQuery.data.image}
+            alt={`thumbnail for ${blogQuery.data.title}`}
+            className="object-cover"
+          />
+        </div>
+        <div
+          dangerouslySetInnerHTML={{ __html: blogQuery.data.content }}
+          className="prose prose-neutral prose-pre:bg-zinc-100 prose-pre:text-black dark:prose-pre:text-current dark:prose-pre:bg-zinc-800 dark:prose-invert sm:prose-sm md:prose-base lg:prose-lg mt-8"
         />
       </div>
-      <div className="flex justify-center items-center mt-8">
-        <img
-          src={blogQuery.data.image}
-          alt={`thumbnail for ${blogQuery.data.title}`}
-          className="object-cover"
-        />
-      </div>
-      <div
-        dangerouslySetInnerHTML={{ __html: blogQuery.data.content }}
-        className="prose prose-neutral prose-pre:bg-zinc-100 prose-pre:text-black dark:prose-pre:text-current dark:prose-pre:bg-zinc-800 dark:prose-invert sm:prose-sm md:prose-base lg:prose-lg mt-8"
-      />
-    </div>
+    </>
   )
 }
 
