@@ -185,6 +185,7 @@ const MultipleSelector = React.forwardRef<
       disabled,
       groupBy,
       className,
+      // @ts-ignore
       badgeClassName,
       selectFirstItem = true,
       creatable = false,
