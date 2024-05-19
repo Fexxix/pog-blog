@@ -329,9 +329,15 @@ blogsRouter.get("/:username/:title", async (req, res) => {
 })
 
 blogsRouter.post("/add", isAuthenticated, async (req, res) => {
-  const { title, content, description, image } = req.body
+  const {
+    title = "",
+    content = "",
+    description = "",
+    image = "",
+    categories = [],
+  } = req.body
 
-  if (!title || !content || !description) {
+  if (!title || !content || !description || !categories) {
     return res.status(400).json({ message: "Missing required fields!" })
   }
 
@@ -341,6 +347,12 @@ blogsRouter.post("/add", isAuthenticated, async (req, res) => {
 
   if (description.length > 500) {
     return res.status(400).json({ message: "Description too long!" })
+  }
+
+  if (categories.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Please choose at least 1 category!" })
   }
 
   try {
@@ -353,6 +365,7 @@ blogsRouter.post("/add", isAuthenticated, async (req, res) => {
       image,
       likes: [],
       comments: [],
+      categories,
     })
 
     res.status(200).json({ message: "Blog created successfully!" })

@@ -17,7 +17,7 @@ import {
   Strikethrough,
   OptionsIcon,
 } from "@/lib/icons"
-import { cn, publicDateFormatter } from "@/lib/utils"
+import { CATEGORIES, cn, publicDateFormatter } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import {
   useEditor,
@@ -61,10 +61,16 @@ import { toast } from "sonner"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { useNavigate } from "react-router-dom"
-
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
+import MultipleSelector, {
+  type Option,
+} from "@/components/ui/multiple-selector"
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
+const CategoriesOptions: Option[] = CATEGORIES.map((category) => ({
+  label: category,
+  value: category,
+}))
 
 const extensions = [
   StarterKit,
@@ -83,10 +89,16 @@ function useBlogsMutation() {
   return useMutation<
     any,
     Error | AxiosError,
-    { title: string; content: string; description: string; image: string }
+    {
+      title: string
+      content: string
+      description: string
+      image: string
+      categories: Category[]
+    }
   >({
     mutationKey: ["blogs"],
-    mutationFn: async ({ content, description, image, title }) => {
+    mutationFn: async ({ content, description, image, title, categories }) => {
       return await axios.post(
         `/api/blogs/add`,
         {
@@ -94,6 +106,7 @@ function useBlogsMutation() {
           description,
           image,
           title,
+          categories,
         },
         { withCredentials: true }
       )
@@ -106,7 +119,7 @@ function useBlogsMutation() {
       toast.success("Blog posted!")
 
       queryClient.invalidateQueries({ queryKey: ["blogs"] })
-      navigate("/blogs", { replace: true })
+      navigate("/", { replace: true })
     },
     onError: (err) => {
       const message =
@@ -120,6 +133,8 @@ function useBlogsMutation() {
   })
 }
 
+type Category = (typeof CATEGORIES)[number]
+
 export function WritePage() {
   const { user } = useAuthContext()
   const [title, setTitle] = useState("")
@@ -128,6 +143,7 @@ export function WritePage() {
     src: string
     title: string
   } | null>(null)
+  const [categories, setCategories] = useState<Category[]>([])
   const [editor, setEditor] = useState<EditorType | null>(null)
 
   const [showImage, setShowImage] = useState<Checked>(true)
@@ -148,13 +164,17 @@ export function WritePage() {
               if (!title) toast.error("Title is required!")
               if (!description) toast.error("Description is required!")
               if (!content) toast.error("Content is required!")
-              if (!title || !description || !content) return
+              if (categories.length === 0)
+                toast.error("Categories are required!")
+              if (!title || !description || !content || !categories.length)
+                return
 
               blogMutation.mutate({
                 content: content || "",
                 description,
                 image: blogImage?.src ?? "",
                 title,
+                categories,
               })
             }}
             disabled={blogMutation.isPending || blogMutation.isSuccess}
@@ -196,7 +216,8 @@ export function WritePage() {
         contentEditable
         data-placeholder="Write a short description..."
         onInput={(e) => setDescription(e.currentTarget.textContent ?? "")}
-      ></h2>
+      />
+      <CategoriesSelect setCategories={setCategories} />
       <div className="flex items-center gap-3 mt-4 py-2">
         <Avatar>
           <AvatarImage
@@ -454,6 +475,29 @@ function BlockTypeSelect({ editor }: { editor: EditorType }) {
         <SelectItem value="heading-6">Heading 6</SelectItem>
       </SelectContent>
     </Select>
+  )
+}
+
+function CategoriesSelect({
+  setCategories,
+}: {
+  setCategories: (categories: Category[]) => void
+}) {
+  return (
+    <div className="pt-4">
+      <MultipleSelector
+        defaultOptions={CategoriesOptions}
+        placeholder="Select categories..."
+        onChange={(options) =>
+          setCategories(options.map((option) => option.value as Category))
+        }
+        emptyIndicator={
+          <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+            No results found.
+          </p>
+        }
+      />
+    </div>
   )
 }
 
