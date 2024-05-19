@@ -9,3 +9,6 @@
 - seed comments (again)
 - profile links for avatars
 - edit blogs feature
+- search feature
+- MAJOR REFACTOR
+- encodeURI and decodeURI URLs
