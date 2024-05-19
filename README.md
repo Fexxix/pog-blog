@@ -12,3 +12,5 @@
 - search feature
 - MAJOR REFACTOR
 - encodeURI and decodeURI URLs
+- drafts (not sure though)
+- skeleton for suspense
