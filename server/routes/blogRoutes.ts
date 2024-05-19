@@ -295,9 +295,7 @@ blogsRouter.get("/:username/:title", async (req, res) => {
     const blog = await BlogModel.findOne({
       title,
       author: author._id,
-    })
-      .populate({ path: "author", select: "username profilePicture" })
-      .exec()
+    }).exec()
 
     if (blog) {
       return res.json({
@@ -309,15 +307,14 @@ blogsRouter.get("/:username/:title", async (req, res) => {
         likes: blog.likes.length,
         comments: blog.comments.length,
         author: {
-          // @ts-ignore
-          username: blog.author.username,
-          // @ts-ignore
-          profilePicture: blog.author.profilePicture,
+          username: author.username,
+          profilePicture: author.profilePicture,
         },
         image: blog.image,
         categories: blog.categories,
         hasLiked:
           blog.likes.includes(res.locals.session?.userId ?? "") ?? false,
+        isAuthor: blog.author === res.locals.session?.userId,
       })
     }
 
@@ -369,6 +366,53 @@ blogsRouter.post("/add", isAuthenticated, async (req, res) => {
     })
 
     res.status(200).json({ message: "Blog created successfully!" })
+  } catch {
+    return res.status(500).json({ message: "Internal Server Error!" })
+  }
+})
+
+blogsRouter.patch("/edit", isAuthenticated, async (req, res) => {
+  const {
+    id = "",
+    title = "",
+    content = "",
+    description = "",
+    image = "",
+    categories = "",
+  } = req.body
+
+  if (!title || !content || !description || !categories) {
+    return res.status(400).json({ message: "Missing required fields!" })
+  }
+
+  if (!id) {
+    return res.status(400).json({ message: "Missing blog id!" })
+  }
+
+  if (title.length > 100) {
+    return res.status(400).json({ message: "Title too long!" })
+  }
+
+  if (description.length > 500) {
+    return res.status(400).json({ message: "Description too long!" })
+  }
+
+  if (categories.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Please choose at least 1 category!" })
+  }
+
+  try {
+    await BlogModel.findByIdAndUpdate(id, {
+      title,
+      content,
+      description,
+      image,
+      categories,
+    })
+
+    res.status(200).json({ message: "Blog updated successfully!" })
   } catch {
     return res.status(500).json({ message: "Internal Server Error!" })
   }
