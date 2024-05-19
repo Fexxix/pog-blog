@@ -105,7 +105,9 @@ export function ExplorePage() {
 export function BlogCard({ blogData }: { blogData: Blog }) {
   return (
     <Link
-      to={`/${blogData.author.username}/${blogData.title}`.replace(/ /g, "%20")}
+      to={`/${encodeURIComponent(
+        blogData.author.username
+      )}/${encodeURIComponent(blogData.title)}`}
       className="contents"
     >
       <Card>

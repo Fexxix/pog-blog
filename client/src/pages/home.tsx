@@ -169,7 +169,9 @@ function Feed() {
 export function BlogCard({ blogData }: { blogData: Blog }) {
   return (
     <Link
-      to={`/${blogData.author.username}/${blogData.title}`.replace(/ /g, "%20")}
+      to={`/${encodeURIComponent(
+        blogData.author.username
+      )}/${encodeURIComponent(blogData.title)}`}
       className="contents"
     >
       <Card>
@@ -276,7 +278,9 @@ function InfiniteBlogsSkeleton({ isInitialLoad }: { isInitialLoad?: boolean }) {
         }
       )}
     >
-      <Skeleton className="h-10 w-4/5 bg-zinc-200 dark:bg-zinc-800" />
+      {isInitialLoad && (
+        <Skeleton className="h-10 w-4/5 bg-zinc-200 dark:bg-zinc-800" />
+      )}
       {Array.from({ length: 10 }, (_, i) => (
         <BlogSkeletonCard key={i} />
       ))}

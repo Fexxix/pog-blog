@@ -94,9 +94,14 @@ function useBlogQuery({
     queryKey: [username, title],
     queryFn: async () => {
       return (
-        await axios.get(`/api/blogs/${username}/${title}`, {
-          withCredentials: true,
-        })
+        await axios.get(
+          `/api/blogs/${encodeURIComponent(username)}/${encodeURIComponent(
+            title
+          )}`,
+          {
+            withCredentials: true,
+          }
+        )
       ).data
     },
     refetchOnWindowFocus: false,
