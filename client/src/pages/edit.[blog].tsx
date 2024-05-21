@@ -159,7 +159,13 @@ function useBlogsMutation() {
         })
       } else {
         queryClient.setQueryData(["edit", title], updatedBlog)
-        queryClient.setQueryData([user?.username, title], updatedBlog)
+        queryClient.setQueryData([user?.username, title], {
+          ...updatedBlog,
+          author: {
+            username: user?.username,
+            profilePicture: user?.profilePicture,
+          },
+        })
       }
     },
     onError: (err) => {
