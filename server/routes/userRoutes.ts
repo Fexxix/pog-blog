@@ -274,38 +274,6 @@ userRouter.patch("/categories", isAuthenticated, async (req, res) => {
   }
 })
 
-userRouter.get("/:username", async (req, res) => {
-  const { username } = req.params
-
-  try {
-    const user = await UserModel.findOne({ username })
-
-    if (!user) {
-      return res.status(404).json({ message: "User does not exist!" })
-    }
-
-    const isProfileOwner = res.locals.session?.userId === user._id
-
-    const blogsCount = await BlogModel.countDocuments({ author: user._id })
-
-    res.status(200).json({
-      username: user.username,
-      profilePicture: user.profilePicture,
-      biography: user.biography,
-      id: user._id,
-      followers: user.followers.length,
-      following: user.following.length,
-      isFollowing: user.followers.includes(res.locals.session?.userId ?? ""),
-      isProfileOwner,
-      blogsCount,
-      categories: user.categories,
-    })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: "Internal Server Error!" })
-  }
-})
-
 userRouter.get("/:user_id/blogs", async (req, res) => {
   const { user_id } = req.params
   const pageSize = 20
@@ -447,5 +415,37 @@ userRouter.delete("/unfollow/:id", isAuthenticated, async (req, res) => {
     res.status(200).end()
   } catch {
     res.status(500).json({ message: "Something went wrong!" })
+  }
+})
+
+userRouter.get("/:username", async (req, res) => {
+  const { username } = req.params
+
+  try {
+    const user = await UserModel.findOne({ username })
+
+    if (!user) {
+      return res.status(404).json({ message: "User does not exist!" })
+    }
+
+    const isProfileOwner = res.locals.session?.userId === user._id
+
+    const blogsCount = await BlogModel.countDocuments({ author: user._id })
+
+    res.status(200).json({
+      username: user.username,
+      profilePicture: user.profilePicture,
+      biography: user.biography,
+      id: user._id,
+      followers: user.followers.length,
+      following: user.following.length,
+      isFollowing: user.followers.includes(res.locals.session?.userId ?? ""),
+      isProfileOwner,
+      blogsCount,
+      categories: user.categories,
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: "Internal Server Error!" })
   }
 })
