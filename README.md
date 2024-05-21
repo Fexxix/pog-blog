@@ -8,9 +8,9 @@
 - localize dates
 - seed comments (again)
 - profile links for avatars
-- edit blogs feature
 - search feature
 - MAJOR REFACTOR
 - encodeURI and decodeURI URLs
 - drafts (not sure though)
 - skeleton for suspense
+- edit option in /:username route
