@@ -60,7 +60,7 @@ import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
-import { useLocation, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 import MultipleSelector, {
   type Option,
@@ -76,10 +76,6 @@ type Blog = {
   datePublished: string
   likes: number
   comments: number
-  author: {
-    username: string
-    profilePicture: string
-  }
   image: string
   hasLiked: boolean
   categories: Category[]
@@ -105,9 +101,10 @@ const extensions = [
 function useBlogsMutation() {
   const queryClient = useQueryClient()
   const { user } = useAuthContext()
+  const navigate = useNavigate()
 
   return useMutation<
-    void,
+    Blog,
     AxiosError,
     {
       title: string
@@ -116,6 +113,7 @@ function useBlogsMutation() {
       image: string
       categories: Category[]
       id: string
+      titleChanged: boolean
     }
   >({
     mutationKey: ["blogs"],
@@ -127,27 +125,42 @@ function useBlogsMutation() {
       categories,
       id,
     }) => {
-      return await axios.patch(
-        `/api/blogs/edit`,
-        {
-          content,
-          description,
-          image,
-          title,
-          categories,
-          id,
-        },
-        { withCredentials: true }
-      )
+      return (
+        await axios.patch(
+          `/api/blogs/edit`,
+          {
+            content,
+            description,
+            image,
+            title,
+            categories,
+            id,
+          },
+          { withCredentials: true }
+        )
+      ).data
     },
     onMutate: () => {
       return toast.loading("Updating blog...")
     },
-    onSuccess: (_, { title }) => {
+    onSuccess: (updatedBlog, { title, titleChanged }) => {
       toast.dismiss()
       toast.success("Blog Updated!")
 
-      queryClient.invalidateQueries({ queryKey: [user?.username, title] })
+      if (titleChanged) {
+        queryClient.invalidateQueries({
+          queryKey: ["edit", title],
+        })
+        queryClient.invalidateQueries({ queryKey: [user?.username, title] })
+
+        navigate(`/edit/${encodeURIComponent(title)}`, {
+          replace: true,
+          state: { blog: updatedBlog },
+        })
+      } else {
+        queryClient.setQueryData(["edit", title], updatedBlog)
+        queryClient.setQueryData([user?.username, title], updatedBlog)
+      }
     },
     onError: (err) => {
       const message = (err.response?.data as any)?.message ?? err.message
@@ -172,7 +185,7 @@ function useBlogQuery({
   initialData: Blog | null
 }) {
   return useQuery<Blog>({
-    queryKey: ["edit", username, title],
+    queryKey: ["edit", title],
     queryFn: async () => {
       return (
         await axios.get(
@@ -186,7 +199,6 @@ function useBlogQuery({
       ).data
     },
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
     initialData: initialData ?? undefined,
     enabled,
   })
@@ -194,13 +206,13 @@ function useBlogQuery({
 
 export function EditPage() {
   const { user } = useAuthContext()
-  const { titleParam } = useParams() as any
+  const { title: titleParam } = useParams() as any
   const { state } = useLocation()
 
   const blogQuery = useBlogQuery({
     username: user!.username,
     title: titleParam,
-    enabled: !!state,
+    enabled: !state,
     initialData: state?.blog as Blog | null,
   })
 
@@ -239,6 +251,15 @@ export function EditPage() {
     )
   }
 
+  useEffect(() => {
+    setTitle(blogQuery.data?.title ?? "")
+    setDescription(blogQuery.data?.description ?? "")
+    setBlogImage(
+      blogQuery.data?.image ? { src: blogQuery.data.image, title: "" } : null
+    )
+    setCategories(blogQuery.data?.categories || [])
+  }, [blogQuery.data])
+
   if (blogQuery.isLoading || !blogQuery.data) {
     return <PageSkeleton />
   }
@@ -260,6 +281,8 @@ export function EditPage() {
 
               if (isSame()) return toast("No changes made!")
 
+              const titleChanged = title !== blogQuery.data.title
+
               blogMutation.mutate({
                 content: content || "",
                 description,
@@ -267,6 +290,7 @@ export function EditPage() {
                 title,
                 categories,
                 id: blogQuery.data.id,
+                titleChanged,
               })
             }}
             disabled={blogMutation.isPending}

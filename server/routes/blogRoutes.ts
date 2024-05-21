@@ -404,15 +404,34 @@ blogsRouter.patch("/edit", isAuthenticated, async (req, res) => {
   }
 
   try {
-    await BlogModel.findByIdAndUpdate(id, {
-      title,
-      content,
-      description,
-      image,
-      categories,
-    })
+    const updatedBlog = await BlogModel.findByIdAndUpdate(
+      id,
+      {
+        title,
+        content,
+        description,
+        image,
+        categories,
+      },
+      {
+        new: true,
+      }
+    )
 
-    res.status(200).json({ message: "Blog updated successfully!" })
+    res.status(200).json({
+      id: updatedBlog?._id,
+      title: updatedBlog?.title,
+      content: updatedBlog?.content,
+      description: updatedBlog?.description,
+      datePublished: updatedBlog?.datePublished.toISOString(),
+      likes: updatedBlog?.likes.length,
+      comments: updatedBlog?.comments.length,
+      image: updatedBlog?.image,
+      categories: updatedBlog?.categories,
+      hasLiked:
+        updatedBlog?.likes.includes(res.locals.session?.userId ?? "") ?? false,
+      isAuthor: updatedBlog?.author === res.locals.session?.userId,
+    })
   } catch {
     return res.status(500).json({ message: "Internal Server Error!" })
   }
