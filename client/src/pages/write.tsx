@@ -17,7 +17,7 @@ import {
   Strikethrough,
   OptionsIcon,
 } from "@/lib/icons"
-import { CATEGORIES, cn, publicDateFormatter } from "@/lib/utils"
+import { CATEGORIES, cn, publishedDateFormatter } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import {
   useEditor,
@@ -229,7 +229,7 @@ export function WritePage() {
         <span>{user?.username}</span>
         <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
         <span className="text-xs sm:text-sm">
-          {publicDateFormatter.format(new Date())}
+          {publishedDateFormatter.format(new Date())}
         </span>
       </div>
       <div className="flex items-center gap-3 px-2 mt-2 border-y border-y-zinc-200 dark:border-y-zinc-800">

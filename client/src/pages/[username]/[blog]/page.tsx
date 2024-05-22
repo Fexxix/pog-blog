@@ -3,7 +3,7 @@ import {
   CATEGORIES,
   cn,
   likesAndCommentsCountFormatter,
-  publicDateFormatter,
+  publishedDateFormatter,
 } from "@/lib/utils"
 import {
   useInfiniteQuery,
@@ -172,7 +172,9 @@ export function BlogPage() {
           </Link>
           <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
           <span className="text-xs sm:text-sm">
-            {publicDateFormatter.format(new Date(blogQuery.data.datePublished))}
+            {publishedDateFormatter.format(
+              new Date(blogQuery.data.datePublished)
+            )}
           </span>
         </div>
         <div className="flex items-center gap-3 px-2 mt-2 border-y border-y-zinc-200 dark:border-y-zinc-800">
@@ -569,7 +571,7 @@ function CommentsButton({
                             {comment.author.username}
                           </span>
                           <span className="text-xs">
-                            {publicDateFormatter.format(
+                            {publishedDateFormatter.format(
                               new Date(comment.datePosted)
                             )}
                           </span>

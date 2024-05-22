@@ -10,7 +10,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuthContext } from "@/contexts/AuthContextProvider"
 import {
-  publicDateFormatter,
+  publishedDateFormatter,
   cn,
   likesAndCommentsCountFormatter,
   CATEGORIES,
@@ -189,7 +189,7 @@ export function BlogCard({ blogData }: { blogData: Blog }) {
             </span>
             <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
             <span className="text-xs sm:text-sm">
-              {publicDateFormatter.format(new Date(blogData.datePublished))}
+              {publishedDateFormatter.format(new Date(blogData.datePublished))}
             </span>
           </div>
         </CardHeader>
