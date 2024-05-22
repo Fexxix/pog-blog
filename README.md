@@ -6,11 +6,13 @@
 - make /:username route responsive
 - UI for error
 - localize dates
-- seed comments (again)
+- seed comments (again) and delete references of previous comments
 - profile links for avatars
-- search feature
+- search feature (half done)
 - MAJOR REFACTOR
 - encodeURI and decodeURI URLs
 - drafts (not sure though)
 - skeleton for suspense
 - edit option in /:username route
+- purifying content in backend from script tags
+- deleting blogs
