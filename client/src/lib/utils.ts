@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const publicDateFormatter = new Intl.DateTimeFormat("en-US", {
+export const publishedDateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
   month: "short",
   day: "numeric",
@@ -72,3 +72,22 @@ export const CATEGORIES = [
   "Parenting",
   "Environment & Sustainability",
 ] as const
+
+export function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  wait: number
+): T {
+  let timeout: ReturnType<typeof setTimeout>
+
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    const context = this
+
+    clearTimeout(timeout)
+
+    timeout = setTimeout(() => {
+      func.apply(context, args)
+    }, wait)
+  } as T
+}
+
+export default debounce
