@@ -12,10 +12,11 @@ import { useCallback, useEffect, useState } from "react"
 import { Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import { debounce, publishedDateFormatter } from "@/lib/utils"
 import { Link, useNavigate } from "react-router-dom"
 import { Skeleton } from "@/components/ui/skeleton"
+import { toast } from "sonner"
 
 type Result = {
   id: string
@@ -42,22 +43,27 @@ export function SearchDialog() {
   const [isTyping, setIsTyping] = useState(false)
   const navigate = useNavigate()
 
-  const { data, isError, isLoading, hasNextPage, isFetching, fetchNextPage } =
-    useInfiniteQuery<InfiniteResultsList>({
-      queryKey: ["search", searchQuery],
-      queryFn: async ({ pageParam }) => {
-        return (
-          await axios.get(
-            `/api/blogs/search?q=${searchQuery}?page=${pageParam}`
-          )
-        ).data
-      },
-      getNextPageParam: (lastPage) => lastPage.nextPage,
-      initialPageParam: 1,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      enabled: !!searchQuery,
-    })
+  const {
+    data,
+    isError,
+    isLoading,
+    hasNextPage,
+    isFetching,
+    fetchNextPage,
+    error,
+  } = useInfiniteQuery<InfiniteResultsList, AxiosError>({
+    queryKey: ["search", searchQuery],
+    queryFn: async ({ pageParam }) => {
+      return (
+        await axios.get(`/api/blogs/search?q=${searchQuery}?page=${pageParam}`)
+      ).data
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 1,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+    enabled: !!searchQuery,
+  })
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -82,6 +88,15 @@ export function SearchDialog() {
     setIsTyping(true)
     setInputValue(value)
     debouncedSetSearchQuery(value)
+  }
+
+  if (error) {
+    const msg = (error.response?.data as any)?.message ?? error.message
+
+    toast.error(msg, {
+      duration: undefined,
+      closeButton: true,
+    })
   }
 
   return (
@@ -158,9 +173,12 @@ export function SearchDialog() {
               </CommandLoading>
             )}
             {!isLoading &&
-              (!data || data?.pages.length === 0) &&
+              (!data ||
+                data?.pages.length === 0 ||
+                data.pages[0].results.length === 0) &&
               !!inputValue &&
-              !isTyping && <CommandEmpty>No results found.</CommandEmpty>}
+              !isTyping &&
+              !isError && <CommandEmpty>No results found.</CommandEmpty>}
             {hasNextPage && (
               <div className="flex justify-center py-2">
                 <Button
