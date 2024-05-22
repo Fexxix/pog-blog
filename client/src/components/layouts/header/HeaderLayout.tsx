@@ -5,6 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContextProvider"
 import { HeaderAvatar } from "./HeaderAvatar"
 import { Pencil } from "@/lib/icons"
 import { cn } from "@/lib/utils"
+import { SearchDialog } from "./SearchDialog"
 
 export function HeaderLayout() {
   const { pathname } = useLocation()
@@ -16,6 +17,17 @@ export function HeaderLayout() {
 
   const isEditRoute = pathname.startsWith("/edit/")
 
+  const canDisplaySearch = (() => {
+    if (
+      pathname === "/login" ||
+      pathname === "/signup" ||
+      pathname === "/choose-categories"
+    )
+      return false
+    if (pathname === "/" && !user) return false
+    return true
+  })()
+
   return (
     <>
       <header
@@ -26,15 +38,15 @@ export function HeaderLayout() {
           }
         )}
       >
-        <div className="flex items-center gap-3">
-          <img
-            className="size-8 md:size-10 invert dark:invert-0"
-            src="/logo.svg"
-            alt="logo"
-          />
-          <span className="text-3xl hidden sm:block text-black dark:text-white font-semibold select-none">
-            Pog Blog
-          </span>
+        <div className="flex items-center gap-5">
+          <Link className="contents" to="/">
+            <img
+              className="size-8 md:size-10 invert dark:invert-0"
+              src="/logo.svg"
+              alt="logo"
+            />
+          </Link>
+          {canDisplaySearch && <SearchDialog />}
         </div>
         <div className="flex items-center gap-3">
           {pathname !== "/login" && !user && (

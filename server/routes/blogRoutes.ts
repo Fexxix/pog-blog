@@ -436,3 +436,72 @@ blogsRouter.patch("/edit", isAuthenticated, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error!" })
   }
 })
+
+blogsRouter.get("/search", async (req, res) => {
+  const { q = "" } = req.query
+  const page = parseInt(req.query.page as string) || 1
+  const pageSize = 10
+
+  if (isNaN(page) || page < 1) {
+    return res.status(400).json({ message: "Invalid page number" })
+  }
+
+  const skip = (page - 1) * pageSize
+
+  if (!q) {
+    return res.status(400).json({ message: "Missing search query!" })
+  }
+
+  try {
+    const [results, totalDocuments] = await Promise.all([
+      BlogModel.find(
+        {
+          $text: {
+            $search: q as string,
+            $caseSensitive: false,
+          },
+        },
+        {
+          score: { $meta: "textScore" },
+        }
+      )
+        .populate({
+          path: "author",
+          select: "username profilePicture",
+        })
+        .sort({ score: { $meta: "textScore" } })
+        .skip(skip)
+        .limit(pageSize)
+        .exec(),
+      BlogModel.countDocuments({
+        $text: {
+          $search: q as string,
+          $caseSensitive: false,
+        },
+      }),
+    ])
+
+    const hasMore = page * pageSize < totalDocuments
+    const nextPage = hasMore ? page + 1 : null
+
+    res.status(200).json({
+      results: results.map((blog) => ({
+        id: blog._id,
+        title: blog.title,
+        datePublished: blog.datePublished.toISOString(),
+        author: {
+          // @ts-ignore
+          username: blog.author.username,
+          // @ts-ignore
+          profilePicture: blog.author.profilePicture,
+        },
+        image: blog.image,
+      })),
+      hasMore,
+      nextPage,
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal Server Error!" })
+  }
+})

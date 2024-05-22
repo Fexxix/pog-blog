@@ -40,47 +40,51 @@ export const CATEGORIES = [
   "Environment & Sustainability",
 ]
 
-export const BlogModel = model(
-  "blogs",
-  new Schema({
-    title: {
-      type: String,
-      required: true,
+const blogSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  image: {
+    type: String,
+  },
+  author: {
+    type: String,
+    ref: "users",
+    required: true,
+  },
+  datePublished: {
+    type: Date,
+    required: true,
+    default: () => new Date(),
+  },
+  categories: {
+    type: [String],
+    enum: CATEGORIES,
+    required: true,
+  },
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "comments",
     },
-    content: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-    },
-    image: {
-      type: String,
-    },
-    author: {
-      type: String,
-      ref: "users",
-      required: true,
-    },
-    datePublished: {
-      type: Date,
-      required: true,
-      default: () => new Date(),
-    },
-    categories: {
-      type: [String],
-      enum: CATEGORIES,
-      required: true,
-    },
-    comments: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "comments",
-      },
-    ],
-    likes: {
-      type: [{ type: String, ref: "users" }],
-      default: [],
-    },
-  } as const)
-)
+  ],
+  likes: {
+    type: [{ type: String, ref: "users" }],
+    default: [],
+  },
+} as const)
+
+// Compound unique index to ensure each user cannot have two articles with the same title
+blogSchema.index({ title: 1, author: 1 }, { unique: true })
+// Text index for full-text search on the title field
+blogSchema.index({ title: "text" })
+
+export const BlogModel = model("blogs", blogSchema)
