@@ -62,10 +62,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
-import MultipleSelector, {
-  type Option,
-} from "@/components/ui/multiple-selector"
+// import MultipleSelector, {
+//   type Option,
+// } from "@/components/ui/multiple-selector"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  MultiSelector,
+  MultiSelectorContent,
+  MultiSelectorInput,
+  MultiSelectorItem,
+  MultiSelectorList,
+  MultiSelectorTrigger,
+} from "@/components/ui/multiple-selector"
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
 type Blog = {
@@ -83,10 +91,10 @@ type Blog = {
 }
 type Category = (typeof CATEGORIES)[number]
 
-const CategoriesOptions: Option[] = CATEGORIES.map((category) => ({
-  label: category,
-  value: category,
-}))
+// const CategoriesOptions: Option[] = CATEGORIES.map((category) => ({
+//   label: category,
+//   value: category,
+// }))
 
 const extensions = [
   StarterKit,
@@ -614,30 +622,32 @@ function BlockTypeSelect({ editor }: { editor: EditorType }) {
 }
 
 function CategoriesSelect({
-  setCategories,
   categories,
+  setCategories,
 }: {
-  setCategories: (categories: Category[]) => void
   categories: Category[]
+  setCategories: (categories: Category[]) => void
 }) {
   return (
     <div className="pt-4">
-      <MultipleSelector
-        defaultOptions={CategoriesOptions}
-        value={categories.map((category) => ({
-          label: category,
-          value: category,
-        }))}
-        placeholder="Select categories..."
-        onChange={(options) =>
-          setCategories(options.map((option) => option.value as Category))
-        }
-        emptyIndicator={
-          <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-            No results found.
-          </p>
-        }
-      />
+      <MultiSelector
+        values={categories}
+        onValuesChange={setCategories as any}
+        loop
+      >
+        <MultiSelectorTrigger>
+          <MultiSelectorInput placeholder="Select categories..." />
+        </MultiSelectorTrigger>
+        <MultiSelectorContent>
+          <MultiSelectorList>
+            {CATEGORIES.map((category) => (
+              <MultiSelectorItem value={category} key={category}>
+                {category}
+              </MultiSelectorItem>
+            ))}
+          </MultiSelectorList>
+        </MultiSelectorContent>
+      </MultiSelector>
     </div>
   )
 }

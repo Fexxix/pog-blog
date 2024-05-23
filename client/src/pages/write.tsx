@@ -62,15 +62,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { useNavigate } from "react-router-dom"
 import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
-import MultipleSelector, {
-  type Option,
-} from "@/components/ui/multiple-selector"
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
-const CategoriesOptions: Option[] = CATEGORIES.map((category) => ({
-  label: category,
-  value: category,
-}))
+import {
+  MultiSelector,
+  MultiSelectorContent,
+  MultiSelectorInput,
+  MultiSelectorItem,
+  MultiSelectorList,
+  MultiSelectorTrigger,
+} from "@/components/ui/multiple-selector"
 
 const extensions = [
   StarterKit,
@@ -85,6 +86,7 @@ const extensions = [
 function useBlogsMutation() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { user } = useAuthContext()
 
   return useMutation<
     any,
@@ -114,12 +116,15 @@ function useBlogsMutation() {
     onMutate: () => {
       return toast.loading("Posting blog...")
     },
-    onSuccess: () => {
+    onSuccess: (_, { title }) => {
       toast.dismiss()
       toast.success("Blog posted!")
 
       queryClient.invalidateQueries({ queryKey: ["blogs"] })
-      navigate("/", { replace: true })
+      navigate(
+        `/${encodeURIComponent(user!.username)}/${encodeURIComponent(title)}`,
+        { replace: true }
+      )
     },
     onError: (err) => {
       const message =
@@ -217,7 +222,7 @@ export function WritePage() {
         data-placeholder="Write a short description..."
         onInput={(e) => setDescription(e.currentTarget.textContent ?? "")}
       />
-      <CategoriesSelect setCategories={setCategories} />
+      <CategoriesSelect categories={categories} setCategories={setCategories} />
       <div className="flex items-center gap-3 mt-4 py-2">
         <Avatar>
           <AvatarImage
@@ -479,24 +484,32 @@ function BlockTypeSelect({ editor }: { editor: EditorType }) {
 }
 
 function CategoriesSelect({
+  categories,
   setCategories,
 }: {
+  categories: Category[]
   setCategories: (categories: Category[]) => void
 }) {
   return (
     <div className="pt-4">
-      <MultipleSelector
-        defaultOptions={CategoriesOptions}
-        placeholder="Select categories..."
-        onChange={(options) =>
-          setCategories(options.map((option) => option.value as Category))
-        }
-        emptyIndicator={
-          <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-            No results found.
-          </p>
-        }
-      />
+      <MultiSelector
+        values={categories}
+        onValuesChange={setCategories as any}
+        loop
+      >
+        <MultiSelectorTrigger>
+          <MultiSelectorInput placeholder="Select categories..." />
+        </MultiSelectorTrigger>
+        <MultiSelectorContent>
+          <MultiSelectorList>
+            {CATEGORIES.map((category) => (
+              <MultiSelectorItem value={category} key={category}>
+                {category}
+              </MultiSelectorItem>
+            ))}
+          </MultiSelectorList>
+        </MultiSelectorContent>
+      </MultiSelector>
     </div>
   )
 }
