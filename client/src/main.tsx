@@ -19,6 +19,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { ProfilePage } from "./pages/[username]/page.tsx"
 import { ChooseCategories } from "./pages/choose-categories.tsx"
 import { EditPage } from "./pages/edit.[blog].tsx"
+import { SearchPage } from "./pages/search.tsx"
 
 const browserRouter = createBrowserRouter([
   {
@@ -55,6 +56,10 @@ const browserRouter = createBrowserRouter([
             <WritePage />
           </PrivateRoute>
         ),
+      },
+      {
+        path: "/search",
+        element: <SearchPage />,
       },
       {
         path: "/edit/:title",

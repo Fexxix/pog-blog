@@ -89,5 +89,3 @@ export function debounce<T extends (...args: any[]) => void>(
     }, wait)
   } as T
 }
-
-export default debounce

@@ -55,7 +55,9 @@ export function SearchDialog() {
     queryKey: ["search", searchQuery],
     queryFn: async ({ pageParam }) => {
       return (
-        await axios.get(`/api/blogs/search?q=${searchQuery}?page=${pageParam}`)
+        await axios.get(
+          `/api/blogs/search?q=${searchQuery}&type=most_relevant&page=${pageParam}`
+        )
       ).data
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -70,6 +72,11 @@ export function SearchDialog() {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setOpen(!open)
+      }
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && open) {
+        e.preventDefault()
+        navigate(`/search?q=${inputValue}`)
+        setOpen(false)
       }
     }
     document.addEventListener("keydown", down)
@@ -114,10 +121,13 @@ export function SearchDialog() {
         </div>
         <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded bg-zinc-200 dark:bg-zinc-800 px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
           <span className="text-xs">⌘</span>K
-        </kbd>{" "}
+        </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <Command shouldFilter={false}>
+        <Command
+          shouldFilter={false}
+          className="[&_[cmdk-input-wrapper]]:border-b-0"
+        >
           <CommandInput
             value={inputValue}
             onValueChange={handleInputChange}
@@ -183,6 +193,7 @@ export function SearchDialog() {
               <div className="flex justify-center py-2">
                 <Button
                   disabled={isFetching || isLoading}
+                  className="h-8"
                   onClick={() => fetchNextPage()}
                 >
                   {isFetching ? "Loading..." : "Load more"}
@@ -191,6 +202,22 @@ export function SearchDialog() {
             )}
           </CommandList>
           <CommandSeparator />
+          <div className="flex justify-center items-center gap-2 py-2 border-t">
+            <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded bg-zinc-200 dark:bg-zinc-800 px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+              <span className="text-lg">⌘</span>
+              <span className="text-xs"> + Enter</span>
+            </kbd>
+            <span className="text-sm flex gap-1">
+              for
+              <Link
+                to={`/search?q=${inputValue}`}
+                onClick={() => setOpen(false)}
+                className="underline"
+              >
+                advanced search page
+              </Link>
+            </span>
+          </div>
         </Command>
       </CommandDialog>
     </>

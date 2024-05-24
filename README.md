@@ -8,7 +8,6 @@
 - localize dates
 - seed comments (again) and delete references of previous comments
 - profile links for avatars
-- search feature (half done)
 - MAJOR REFACTOR
 - encodeURI and decodeURI URLs
 - drafts (not sure though)

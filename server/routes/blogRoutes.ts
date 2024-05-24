@@ -438,47 +438,64 @@ blogsRouter.patch("/edit", isAuthenticated, async (req, res) => {
 })
 
 blogsRouter.get("/search", async (req, res) => {
-  const { q = "" } = req.query
+  const {
+    q = "",
+    categories = "",
+    type = "most_relevant",
+  } = req.query as {
+    q?: string
+    categories?: string
+    type: "most_relevant" | "oldest" | "newest"
+  }
+
   const page = parseInt(req.query.page as string) || 1
   const pageSize = 10
 
-  if (isNaN(page) || page < 1) {
-    return res.status(400).json({ message: "Invalid page number" })
+  if (!q && !categories) {
+    return res.status(400).json({
+      message: "At least one of 'q' or 'categories' must be provided!",
+    })
   }
 
-  const skip = (page - 1) * pageSize
-
-  if (!q) {
-    return res.status(400).json({ message: "Missing search query!" })
+  if (type === "most_relevant" && !q) {
+    return res
+      .status(400)
+      .json({ message: "'most_relevant' sorting requires a search query!" })
   }
+
+  if (!["most_relevant", "oldest", "newest"].includes(type)) {
+    return res.status(400).json({ message: "Invalid sort type!" })
+  }
+
+  const skip = page * pageSize
 
   try {
+    const searchCriteria: any = {}
+    if (q) {
+      searchCriteria.$text = { $search: q, $caseSensitive: false }
+    }
+    if (categories) {
+      searchCriteria.categories = { $in: categories.split(",") }
+    }
+
+    const sortOptions = {
+      most_relevant: { score: { $meta: "textScore" } },
+      oldest: { datePublished: 1 },
+      newest: { datePublished: -1 },
+    }
+
     const [results, totalDocuments] = await Promise.all([
-      BlogModel.find(
-        {
-          $text: {
-            $search: q as string,
-            $caseSensitive: false,
-          },
-        },
-        {
-          score: { $meta: "textScore" },
-        }
-      )
+      BlogModel.find(searchCriteria)
         .populate({
           path: "author",
           select: "username profilePicture",
         })
-        .sort({ score: { $meta: "textScore" } })
+        // @ts-ignore
+        .sort(sortOptions[type])
         .skip(skip)
         .limit(pageSize)
         .exec(),
-      BlogModel.countDocuments({
-        $text: {
-          $search: q as string,
-          $caseSensitive: false,
-        },
-      }),
+      BlogModel.countDocuments(searchCriteria),
     ])
 
     const hasMore = page * pageSize < totalDocuments
@@ -496,6 +513,9 @@ blogsRouter.get("/search", async (req, res) => {
           profilePicture: blog.author.profilePicture,
         },
         image: blog.image,
+        likes: blog.likes.length,
+        categories: blog.categories,
+        description: blog.description,
       })),
       hasMore,
       nextPage,
