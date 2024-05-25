@@ -404,8 +404,8 @@ blogsRouter.patch("/edit", isAuthenticated, async (req, res) => {
   }
 
   try {
-    const updatedBlog = await BlogModel.findByIdAndUpdate(
-      id,
+    const updatedBlog = await BlogModel.findOneAndUpdate(
+      { _id: id, author: res.locals.session?.userId },
       {
         title,
         content,
@@ -417,6 +417,10 @@ blogsRouter.patch("/edit", isAuthenticated, async (req, res) => {
         new: true,
       }
     )
+
+    if (!updatedBlog) {
+      return res.status(400).json({ message: "Blog does not exist!" })
+    }
 
     res.status(200).json({
       id: updatedBlog?._id,
