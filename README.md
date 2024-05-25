@@ -15,3 +15,4 @@
 - edit option in /:username route
 - purifying content in backend from script tags
 - deleting blogs
+- authorization
