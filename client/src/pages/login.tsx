@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 import { useMutation } from "@tanstack/react-query"
 import axios, { type AxiosError } from "axios"
 import { useForm } from "react-hook-form"
-import { useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 type LoginFormData = {
@@ -103,6 +103,12 @@ export function Login() {
           </CardContent>
           <CardFooter>
             <div className="flex flex-col justify-center items-center gap-3 w-full">
+              <div className="flex items-center justify-center text-sm">
+                Don't have an account?
+                <Link className="underline ml-1" to="/signup">
+                  Sign Up
+                </Link>
+              </div>
               <Button
                 className="w-full"
                 disabled={loginMutation.isPending || loginMutation.isSuccess}

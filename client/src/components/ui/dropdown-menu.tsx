@@ -196,3 +196,6 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
 }
+
+export type Checked =
+  DropdownMenuPrimitive.DropdownMenuCheckboxItemProps["checked"]

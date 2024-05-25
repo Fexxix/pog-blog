@@ -1,38 +1,13 @@
 import { useState, useEffect, useCallback } from "react"
-import { useSearchParams, Link } from "react-router-dom"
-import {
-  CATEGORIES,
-  cn,
-  debounce,
-  likesAndCommentsCountFormatter,
-  publishedDateFormatter,
-} from "@/lib/utils"
+import { useSearchParams } from "react-router-dom"
+import { Category, debounce } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import {
-  MultiSelector,
-  MultiSelectorTrigger,
-  MultiSelectorInput,
-  MultiSelectorContent,
-  MultiSelectorList,
-  MultiSelectorItem,
-} from "@/components/ui/multiple-selector"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from "@/components/ui/card"
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
-import { Heart } from "@/lib/icons"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-
-type Category = (typeof CATEGORIES)[number]
+import { BlogCard, BlogSkeletonCard } from "@/components/BlogCard"
+import { CategoriesSelect } from "@/components/CategoriesSelect"
 
 type Blog = {
   id: string
@@ -46,7 +21,7 @@ type Blog = {
   }
   datePublished: string
   hasLiked: boolean
-  categories: (typeof CATEGORIES)[number][]
+  categories: Category[]
 }
 
 type InfiniteBlogList = {
@@ -57,7 +32,7 @@ type InfiniteBlogList = {
 
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [inputValue, setInputValue] = useState("")
+  const [inputValue, setInputValue] = useState(searchParams.get("q") || "")
 
   const [isTyping, setIsTyping] = useState(false)
 
@@ -167,7 +142,9 @@ export function SearchPage() {
               <BlogCard blogData={blog} key={blog.id} />
             ))}
           {(isLoading || isFetching) &&
-            Array.from({ length: 10 }, (_, i) => <BlogSkeletonCard key={i} />)}
+            Array.from({ length: 10 }, (_, i) => (
+              <BlogSkeletonCard key={i} fullWitdth />
+            ))}
           {isError && (
             <div className="w-full flex flex-col items-center justify-center">
               <p className="text-red-500">Something went wrong</p>
@@ -189,136 +166,5 @@ export function SearchPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
-}
-
-function CategoriesSelect({
-  categories,
-  setCategories,
-}: {
-  categories: Category[]
-  setCategories: (categories: Category[]) => void
-}) {
-  return (
-    <MultiSelector
-      values={categories}
-      onValuesChange={setCategories as any}
-      loop
-    >
-      <MultiSelectorTrigger>
-        <MultiSelectorInput placeholder="Select categories..." />
-      </MultiSelectorTrigger>
-      <MultiSelectorContent>
-        <MultiSelectorList>
-          {CATEGORIES.map((category) => (
-            <MultiSelectorItem value={category} key={category}>
-              {category}
-            </MultiSelectorItem>
-          ))}
-        </MultiSelectorList>
-      </MultiSelectorContent>
-    </MultiSelector>
-  )
-}
-
-export function BlogCard({ blogData }: { blogData: Blog }) {
-  return (
-    <Link
-      to={`/${encodeURIComponent(
-        blogData.author.username
-      )}/${encodeURIComponent(blogData.title)}`}
-      className="contents"
-    >
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2 pb-2">
-            <Avatar className="size-8">
-              <AvatarImage
-                className="bg-zinc-200 dark:bg-zinc-800 size-full rounded-full"
-                src={blogData.author.profilePicture}
-              />
-              <AvatarFallback>{blogData.author.username}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm sm:text-base">
-              {blogData.author.username}
-            </span>
-            <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
-            <span className="text-xs sm:text-sm">
-              {publishedDateFormatter.format(new Date(blogData.datePublished))}
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="flex justify-between gap-2">
-          <div className="flex flex-col gap-3">
-            <CardTitle className="text-xl tracking-normal md:text-2xl md:tracking-tight">
-              {blogData.title}
-            </CardTitle>
-            <CardDescription className="hidden sm:block">
-              {blogData.description}
-            </CardDescription>
-          </div>
-          <img
-            src={blogData.image}
-            className="size-full sm:size-40 object-cover"
-            alt={`thumbnail for ${blogData.title}`}
-          />
-        </CardContent>
-        <CardFooter className="flex-col items-start gap-4 overflow-y-auto">
-          <div className="flex items-center gap-2 w-full overflow-y-auto">
-            {blogData.categories.map((category) => (
-              <span
-                key={category}
-                className="px-2 py-1 text-xs sm:text-sm whitespace-nowrap flex-shrink-0 text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-800 rounded"
-              >
-                {category}
-              </span>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <Heart
-              filled={blogData.hasLiked}
-              className={cn({ "text-red-500": blogData.hasLiked })}
-            />
-            <div className="size-0.5 bg-black dark:bg-white rounded-full mt-0.5" />
-            <span className="text-sm sm:text-base">
-              {likesAndCommentsCountFormatter.format(blogData.likes)}
-            </span>
-          </div>
-        </CardFooter>
-      </Card>
-    </Link>
-  )
-}
-
-function BlogSkeletonCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2 pb-2">
-          <Skeleton className="size-8 rounded-full aspect-square" />
-          <Skeleton className="size-0.5 rounded-full mt-0.5" />
-          <Skeleton className="h-2 w-52" />
-        </div>
-      </CardHeader>
-      <CardContent className="flex justify-between gap-2">
-        <div className="flex flex-col gap-3 w-4/5">
-          <CardTitle>
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-2 md:h-5 md:w-[26rem]" />
-              <Skeleton className="h-2 w-1/2 md:hidden" />
-            </div>
-          </CardTitle>
-          <Skeleton className="hidden sm:block h-4 w-full" />
-          <Skeleton className="hidden sm:block h-4 w-full" />
-          <Skeleton className="hidden sm:block h-4 w-1/2" />
-        </div>
-        <Skeleton className="size-20 md:size-40 aspect-square" />
-      </CardContent>
-      <CardFooter className="gap-2">
-        <Skeleton className="size-6 rounded-full" />
-        <Skeleton className="size-0.5 rounded-full mt-0.5" />
-        <Skeleton className="h-2 w-10" />
-      </CardFooter>
-    </Card>
   )
 }
