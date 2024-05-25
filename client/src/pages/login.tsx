@@ -59,6 +59,7 @@ export function Login() {
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
+                defaultValue={(state && state?.email) ?? ""}
                 {...register("email", {
                   pattern: {
                     value:
@@ -67,7 +68,6 @@ export function Login() {
                   },
                   required: "This field is required!",
                   disabled: loginMutation.isPending,
-                  value: (state && state?.email) ?? "",
                 })}
                 id="email"
                 type="email"
