@@ -61,12 +61,12 @@ export function HeaderAvatar() {
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex items-center gap-2">
-          <Link className="contents" to={`/${user?.username}`}>
+        <Link className="contents" to={`/${user?.username}`}>
+          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
             <UserProfileCircle />
             Profile
-          </Link>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuItem
           onClick={() => {
             logoutMutation.mutate()
