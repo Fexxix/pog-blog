@@ -45,7 +45,7 @@ type InfiniteBlogList = {
   nextPage: number
 }
 
-export default function Home() {
+export function Home() {
   const { user } = useAuthContext()
 
   return !user ? (
