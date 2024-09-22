@@ -53,7 +53,7 @@ export default function Home() {
       <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-white dark:bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
       <div className="flex flex-col gap-3 justify-center items-center">
         <h1 className="text-4xl sm:text-7xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 py-8">
-          Read Nigga, Read!
+          Pog Blog
         </h1>
         <p className="text-lg p-2 sm:text-2xl font-medium text-center text-neutral-500 z-20">
           Discover stories, thinking, and expertise from writers on any topic.
