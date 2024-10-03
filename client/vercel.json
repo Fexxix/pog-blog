@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://pog-blog-production.up.railway.app/:path*"
+      "destination": "https://pogblog-yvzjn0aq.b4a.run/:path*"
     },
     {
       "source": "/(.*)",
