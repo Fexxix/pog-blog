@@ -2,8 +2,6 @@
 /server/node_modules
 /server/build
 /server/.env
-/server/models/db_seeders
-/server/models/db_seeders/**
 
 # client
 /client/node_modules
